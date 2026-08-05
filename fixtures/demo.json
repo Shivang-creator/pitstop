@@ -1,0 +1,1498 @@
+{
+  "_comment": "Synthetic channel for offline development, tests and a demo path that cannot fail live. Response shapes match the real YouTube Data API. Regenerate with scripts/make_fixture.py",
+  "channel": {
+    "id": "UCdemoPITSTOPfixture000",
+    "snippet": {
+      "title": "Demo Channel",
+      "customUrl": "@demochannel",
+      "thumbnails": {
+        "high": {
+          "url": "https://i.ytimg.com/demo/channel.jpg"
+        }
+      }
+    },
+    "statistics": {
+      "subscriberCount": "48200",
+      "videoCount": "42",
+      "viewCount": "764474"
+    },
+    "contentDetails": {
+      "relatedPlaylists": {
+        "uploads": "UUdemoPITSTOPfixture000"
+      }
+    }
+  },
+  "videos": [
+    {
+      "id": "vidPITSTOP000",
+      "snippet": {
+        "publishedAt": "2026-07-06T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Blender: modelling a CLI tool in Blender",
+        "description": "In this one I walk through modelling a CLI tool in Blender end to end, including the parts that went wrong.\n\nGear I used: https://pitstop-demo-dead-domain-9f3a2b.com/gear\nCourse link: https://httpbin.org/status/404\nResources: https://bit.ly/3xPitstopDemo\n\n00:00 Intro\n03:00 Setup\n04:35 The build\n06:10 Debugging\n10:10 Result\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP000/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [],
+        "categoryId": "28"
+      },
+      "contentDetails": {
+        "duration": "PT10M45S",
+        "caption": "true"
+      },
+      "statistics": {
+        "viewCount": "2057",
+        "likeCount": "82",
+        "commentCount": "12"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP001",
+      "snippet": {
+        "publishedAt": "2026-06-02T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Blender: sculpting a web scraper from scratch",
+        "description": "In this one I walk through sculpting a web scraper from scratch end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP001/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "blender",
+          "web",
+          "tutorial",
+          "programming",
+          "walkthrough"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT12M0S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "3884",
+        "likeCount": "155",
+        "commentCount": "23"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP002",
+      "snippet": {
+        "publishedAt": "2026-04-29T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Python: building a REST API in Python",
+        "description": "In this one I walk through building a REST API in Python end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP002/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "python"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT20M40S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "43568",
+        "likeCount": "1742",
+        "commentCount": "261"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP003",
+      "snippet": {
+        "publishedAt": "2026-03-26T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Python: automating game loop with Python",
+        "description": "In this one I walk through automating game loop with Python end to end, including the parts that went wrong.\n\n\n00:00 Intro\n02:10 Setup\n06:10 The build\n08:20 Debugging\n09:55 Result\n11:30 What I'd change\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP003/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "python"
+        ],
+        "categoryId": "28"
+      },
+      "contentDetails": {
+        "duration": "PT8M0S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "4324",
+        "likeCount": "172",
+        "commentCount": "25"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP004",
+      "snippet": {
+        "publishedAt": "2026-02-20T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Docker: deploying a chat bot with Docker",
+        "description": "In this one I walk through deploying a chat bot with Docker end to end, including the parts that went wrong.\n\n\n00:42 Intro\n03:42 Setup\n07:42 The build\n09:52 Debugging\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP004/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "docker"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT10M45S",
+        "caption": "true"
+      },
+      "statistics": {
+        "viewCount": "1254",
+        "likeCount": "50",
+        "commentCount": "7"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP005",
+      "snippet": {
+        "publishedAt": "2026-01-17T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Rust: writing a dashboard in Rust",
+        "description": "In this one I walk through writing a dashboard in Rust end to end, including the parts that went wrong.\n\nResources: https://bit.ly/3xPitstopDemo\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP005/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "rust",
+          "dashboard"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT8M0S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "89040",
+        "likeCount": "3561",
+        "commentCount": "534"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP006",
+      "snippet": {
+        "publishedAt": "2025-12-14T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Blender: modelling a parser in Blender",
+        "description": "In this one I walk through modelling a parser in Blender end to end, including the parts that went wrong.\n\n\n00:00 Intro\n02:10 Setup\n04:20 The build\n08:20 Debugging\n10:30 Result\n14:30 What I'd change\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP006/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [],
+        "categoryId": "28"
+      },
+      "contentDetails": {
+        "duration": "PT15M10S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "4744",
+        "likeCount": "189",
+        "commentCount": "28"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP007",
+      "snippet": {
+        "publishedAt": "2025-11-10T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Blender: sculpting a renderer from scratch",
+        "description": "In this one I walk through sculpting a renderer from scratch end to end, including the parts that went wrong.\n\nGear I used: https://pitstop-demo-dead-domain-9f3a2b.com/gear\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP007/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "blender",
+          "renderer"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT10M45S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "3707",
+        "likeCount": "148",
+        "commentCount": "22"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP008",
+      "snippet": {
+        "publishedAt": "2025-10-07T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Python: building a task queue in Python \u2014 the complete start-to-finish walkthrough for absolute beginners in 2026",
+        "description": "In this one I walk through building a task queue in Python end to end, including the parts that went wrong.\n\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP008/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "python",
+          "task",
+          "tutorial",
+          "programming"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT10M45S",
+        "caption": "true"
+      },
+      "statistics": {
+        "viewCount": "6411",
+        "likeCount": "256",
+        "commentCount": "38"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP009",
+      "snippet": {
+        "publishedAt": "2025-09-03T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Python: automating log viewer with Python",
+        "description": "In this one I walk through automating log viewer with Python end to end, including the parts that went wrong.\n\n\n00:00 Intro\n03:00 Setup\n07:00 The build\n11:00 Debugging\n13:10 Result\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP009/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "python"
+        ],
+        "categoryId": "28"
+      },
+      "contentDetails": {
+        "duration": "PT5M20S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "45122",
+        "likeCount": "1804",
+        "commentCount": "270"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP010",
+      "snippet": {
+        "publishedAt": "2025-07-31T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Docker: deploying a portfolio site with Docker",
+        "description": "In this one I walk through deploying a portfolio site with Docker end to end, including the parts that went wrong.\n\nResources: https://bit.ly/3xPitstopDemo\n\n00:42 Intro\n02:52 Setup\n04:27 The build\n07:27 Debugging\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP010/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "docker",
+          "portfolio"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT8M0S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "8121",
+        "likeCount": "324",
+        "commentCount": "48"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP011",
+      "snippet": {
+        "publishedAt": "2025-06-27T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Rust: writing a URL shortener in Rust",
+        "description": "In this one I walk through writing a URL shortener in Rust end to end, including the parts that went wrong.\n\nCourse link: https://httpbin.org/status/404\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP011/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "rust"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT15M10S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "13184",
+        "likeCount": "527",
+        "commentCount": "79"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP012",
+      "snippet": {
+        "publishedAt": "2025-05-24T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Blender: modelling a note app in Blender",
+        "description": "In this one I walk through modelling a note app in Blender end to end, including the parts that went wrong.\n\n\n00:00 Intro\n03:00 Setup\n05:10 The build\n09:10 Debugging\n11:20 Result\n14:20 What I'd change\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP012/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [],
+        "categoryId": "28"
+      },
+      "contentDetails": {
+        "duration": "PT12M0S",
+        "caption": "true"
+      },
+      "statistics": {
+        "viewCount": "13692",
+        "likeCount": "547",
+        "commentCount": "82"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP013",
+      "snippet": {
+        "publishedAt": "2025-04-20T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Blender: sculpting a file watcher from scratch",
+        "description": "In this one I walk through sculpting a file watcher from scratch end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP013/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "blender",
+          "file",
+          "tutorial"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT10M45S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "3084",
+        "likeCount": "123",
+        "commentCount": "18"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP014",
+      "snippet": {
+        "publishedAt": "2025-03-17T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Python: building a CLI tool in Python",
+        "description": "Huge thanks to Acme Cloud for sponsoring this video. Use code BUILD20 for 20% off.\n\nIn this one I walk through building a CLI tool in Python end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP014/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "python",
+          "cli",
+          "tutorial",
+          "programming",
+          "walkthrough"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT10M45S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "7814",
+        "likeCount": "312",
+        "commentCount": "46"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP015",
+      "snippet": {
+        "publishedAt": "2025-02-11T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Python: automating web scraper with Python",
+        "description": "In this one I walk through automating web scraper with Python end to end, including the parts that went wrong.\n\nResources: https://bit.ly/3xPitstopDemo\n\n00:00 Intro\n03:00 Setup\n07:00 The build\n10:00 Debugging\n13:00 Result\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP015/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "python",
+          "web",
+          "tutorial"
+        ],
+        "categoryId": "28"
+      },
+      "contentDetails": {
+        "duration": "PT8M0S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "8862",
+        "likeCount": "354",
+        "commentCount": "53"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP016",
+      "snippet": {
+        "publishedAt": "2025-01-08T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Docker: deploying a REST API with Docker",
+        "description": "In this one I walk through deploying a REST API with Docker end to end, including the parts that went wrong.\n\n\n00:42 Intro\n02:17 Setup\n05:17 The build\n08:17 Debugging\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP016/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "docker",
+          "rest",
+          "tutorial",
+          "programming"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT20M40S",
+        "caption": "true"
+      },
+      "statistics": {
+        "viewCount": "16194",
+        "likeCount": "647",
+        "commentCount": "97"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP017",
+      "snippet": {
+        "publishedAt": "2024-12-05T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Rust: writing a game loop in Rust",
+        "description": "",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP017/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "rust",
+          "game",
+          "tutorial",
+          "programming",
+          "walkthrough"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT5M20S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "16170",
+        "likeCount": "646",
+        "commentCount": "97"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP018",
+      "snippet": {
+        "publishedAt": "2024-11-01T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Blender: modelling a chat bot in Blender",
+        "description": "In this one I walk through modelling a chat bot in Blender end to end, including the parts that went wrong.\n\n\n00:00 Intro\n04:00 Setup\n06:10 The build\n07:45 Debugging\n09:20 Result\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP018/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [],
+        "categoryId": "28"
+      },
+      "contentDetails": {
+        "duration": "PT8M0S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "9272",
+        "likeCount": "370",
+        "commentCount": "55"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP019",
+      "snippet": {
+        "publishedAt": "2024-09-28T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Blender: sculpting a dashboard from scratch",
+        "description": "In this one I walk through sculpting a dashboard from scratch end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP019/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "blender",
+          "dashboard",
+          "tutorial"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT20M40S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "15209",
+        "likeCount": "608",
+        "commentCount": "91"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP020",
+      "snippet": {
+        "publishedAt": "2024-08-25T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Python: building a parser in Python",
+        "description": "In this one I walk through building a parser in Python end to end, including the parts that went wrong.\n\nResources: https://bit.ly/3xPitstopDemo\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP020/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "python",
+          "parser",
+          "tutorial",
+          "programming",
+          "walkthrough"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT20M40S",
+        "caption": "true"
+      },
+      "statistics": {
+        "viewCount": "12631",
+        "likeCount": "505",
+        "commentCount": "75"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP021",
+      "snippet": {
+        "publishedAt": "2024-07-22T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Python: automating renderer with Python",
+        "description": "In this one I walk through automating renderer with Python end to end, including the parts that went wrong.\n\nGear I used: https://pitstop-demo-dead-domain-9f3a2b.com/gear\n\n00:00 Intro\n01:35 Setup\n03:10 The build\n04:45 Debugging\n06:55 Result\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP021/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "python"
+        ],
+        "categoryId": "28"
+      },
+      "contentDetails": {
+        "duration": "PT8M0S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "6875",
+        "likeCount": "275",
+        "commentCount": "41"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP022",
+      "snippet": {
+        "publishedAt": "2024-06-18T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Docker: deploying a task queue with Docker",
+        "description": "In this one I walk through deploying a task queue with Docker end to end, including the parts that went wrong.\n\nCourse link: https://httpbin.org/status/404\n\n00:42 Intro\n02:17 Setup\n06:17 The build\n09:17 Debugging\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP022/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "docker",
+          "task",
+          "tutorial"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT8M0S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "19028",
+        "likeCount": "761",
+        "commentCount": "114"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP023",
+      "snippet": {
+        "publishedAt": "2024-05-15T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "VID_20240417_final2.mp4",
+        "description": "In this one I walk through writing a log viewer in Rust end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP023/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "rust",
+          "log",
+          "tutorial",
+          "programming",
+          "walkthrough"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT8M0S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "24454",
+        "likeCount": "978",
+        "commentCount": "146"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP024",
+      "snippet": {
+        "publishedAt": "2024-04-11T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Blender: modelling a portfolio site in Blender",
+        "description": "In this one I walk through modelling a portfolio site in Blender end to end, including the parts that went wrong.\n\n\n00:00 Intro\n03:00 Setup\n05:10 The build\n06:45 Debugging\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP024/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [],
+        "categoryId": "28"
+      },
+      "contentDetails": {
+        "duration": "PT8M0S",
+        "caption": "true"
+      },
+      "statistics": {
+        "viewCount": "16348",
+        "likeCount": "653",
+        "commentCount": "98"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP025",
+      "snippet": {
+        "publishedAt": "2024-03-08T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Blender: sculpting a URL shortener from scratch",
+        "description": "In this one I walk through sculpting a URL shortener from scratch end to end, including the parts that went wrong.\n\nResources: https://bit.ly/3xPitstopDemo\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP025/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "blender"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT8M0S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "4354",
+        "likeCount": "174",
+        "commentCount": "26"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP026",
+      "snippet": {
+        "publishedAt": "2024-02-03T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Python: building a note app in Python",
+        "description": "In this one I walk through building a note app in Python end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP026/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "python",
+          "note",
+          "tutorial"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT15M10S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "17168",
+        "likeCount": "686",
+        "commentCount": "103"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP027",
+      "snippet": {
+        "publishedAt": "2023-12-31T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Python: automating file watcher with Python",
+        "description": "In this one I walk through automating file watcher with Python end to end, including the parts that went wrong.\n\n\n00:00 Intro\n02:10 Setup\n05:10 The build\n09:10 Debugging\n13:10 Result\n15:20 What I'd change\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP027/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "python",
+          "file",
+          "tutorial",
+          "programming",
+          "walkthrough"
+        ],
+        "categoryId": "28"
+      },
+      "contentDetails": {
+        "duration": "PT8M0S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "5709",
+        "likeCount": "228",
+        "commentCount": "34"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP028",
+      "snippet": {
+        "publishedAt": "2023-11-27T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Docker: deploying a CLI tool with Docker",
+        "description": "In this one I walk through deploying a CLI tool with Docker end to end, including the parts that went wrong.\n\nGear I used: https://pitstop-demo-dead-domain-9f3a2b.com/gear\n\n00:42 Intro\n03:42 Setup\n06:42 The build\n08:52 Debugging\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP028/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "docker",
+          "cli",
+          "tutorial"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT12M0S",
+        "caption": "true"
+      },
+      "statistics": {
+        "viewCount": "24787",
+        "likeCount": "991",
+        "commentCount": "148"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP029",
+      "snippet": {
+        "publishedAt": "2023-10-24T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Rust: writing a web scraper in Rust",
+        "description": "In this one I walk through writing a web scraper in Rust end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP029/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "rust",
+          "web",
+          "tutorial",
+          "programming"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT12M0S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "22513",
+        "likeCount": "900",
+        "commentCount": "135"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP030",
+      "snippet": {
+        "publishedAt": "2023-09-20T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Blender: modelling a REST API in Blender",
+        "description": "In this one I walk through modelling a REST API in Blender end to end, including the parts that went wrong.\n\nResources: https://bit.ly/3xPitstopDemo\n\n00:00 Intro\n03:00 Setup\n04:35 The build\n07:35 Debugging\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP030/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [],
+        "categoryId": "28"
+      },
+      "contentDetails": {
+        "duration": "PT5M20S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "15314",
+        "likeCount": "612",
+        "commentCount": "91"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP031",
+      "snippet": {
+        "publishedAt": "2023-08-17T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Blender: sculpting a game loop from scratch",
+        "description": "",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP031/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "blender",
+          "game",
+          "tutorial",
+          "programming"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT12M0S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "19397",
+        "likeCount": "775",
+        "commentCount": "116"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP032",
+      "snippet": {
+        "publishedAt": "2023-07-14T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Python: building a chat bot in Python",
+        "description": "In this one I walk through building a chat bot in Python end to end, including the parts that went wrong.\n\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP032/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "python",
+          "chat",
+          "tutorial",
+          "programming"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT8M0S",
+        "caption": "true"
+      },
+      "statistics": {
+        "viewCount": "9610",
+        "likeCount": "384",
+        "commentCount": "57"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP033",
+      "snippet": {
+        "publishedAt": "2023-06-10T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Python: automating dashboard with Python",
+        "description": "In this one I walk through automating dashboard with Python end to end, including the parts that went wrong.\n\nCourse link: https://httpbin.org/status/404\n\n00:00 Intro\n02:10 Setup\n04:20 The build\n07:20 Debugging\n09:30 Result\n13:30 What I'd change\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP033/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "python",
+          "dashboard",
+          "tutorial"
+        ],
+        "categoryId": "28"
+      },
+      "contentDetails": {
+        "duration": "PT20M40S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "33396",
+        "likeCount": "1335",
+        "commentCount": "200"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP034",
+      "snippet": {
+        "publishedAt": "2023-05-07T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Docker: deploying a parser with Docker",
+        "description": "In this one I walk through deploying a parser with Docker end to end, including the parts that went wrong.\n\n\n00:42 Intro\n02:52 Setup\n06:52 The build\n09:02 Debugging\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP034/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "docker",
+          "parser",
+          "tutorial",
+          "programming"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT8M0S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "15467",
+        "likeCount": "618",
+        "commentCount": "92"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP035",
+      "snippet": {
+        "publishedAt": "2023-04-03T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Rust: writing a renderer in Rust",
+        "description": "In this one I walk through writing a renderer in Rust end to end, including the parts that went wrong.\n\nGear I used: https://pitstop-demo-dead-domain-9f3a2b.com/gear\nResources: https://bit.ly/3xPitstopDemo\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP035/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "rust",
+          "renderer",
+          "tutorial"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT20M40S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "33681",
+        "likeCount": "1347",
+        "commentCount": "202"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP036",
+      "snippet": {
+        "publishedAt": "2023-02-28T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Blender: modelling a task queue in Blender",
+        "description": "In this one I walk through modelling a task queue in Blender end to end, including the parts that went wrong.\n\n\n00:00 Intro\n03:00 Setup\n04:35 The build\n08:35 Debugging\n12:35 Result\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP036/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [],
+        "categoryId": "28"
+      },
+      "contentDetails": {
+        "duration": "PT20M40S",
+        "caption": "true"
+      },
+      "statistics": {
+        "viewCount": "19517",
+        "likeCount": "780",
+        "commentCount": "117"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP037",
+      "snippet": {
+        "publishedAt": "2023-01-25T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Blender: sculpting a log viewer from scratch",
+        "description": "In this one I walk through sculpting a log viewer from scratch end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP037/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "blender",
+          "log"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT20M40S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "35950",
+        "likeCount": "1438",
+        "commentCount": "215"
+      },
+      "status": {
+        "privacyStatus": "private"
+      }
+    },
+    {
+      "id": "vidPITSTOP038",
+      "snippet": {
+        "publishedAt": "2022-12-22T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Python: building a portfolio site in Python",
+        "description": "In this one I walk through building a portfolio site in Python end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP038/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "python"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT15M10S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "10229",
+        "likeCount": "409",
+        "commentCount": "61"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP039",
+      "snippet": {
+        "publishedAt": "2022-11-18T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Python: automating URL shortener with Python",
+        "description": "In this one I walk through automating URL shortener with Python end to end, including the parts that went wrong.\n\n\n00:00 Intro\n03:00 Setup\n07:00 The build\n10:00 Debugging\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP039/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "python",
+          "url"
+        ],
+        "categoryId": "28"
+      },
+      "contentDetails": {
+        "duration": "PT8M0S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "20533",
+        "likeCount": "821",
+        "commentCount": "123"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP040",
+      "snippet": {
+        "publishedAt": "2022-10-15T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Docker: deploying a note app with Docker",
+        "description": "In this one I walk through deploying a note app with Docker end to end, including the parts that went wrong.\n\nResources: https://bit.ly/3xPitstopDemo\n\n00:42 Intro\n02:52 Setup\n05:02 The build\n06:37 Debugging\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP040/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "docker",
+          "note"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT5M20S",
+        "caption": "true"
+      },
+      "statistics": {
+        "viewCount": "39795",
+        "likeCount": "1591",
+        "commentCount": "238"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    },
+    {
+      "id": "vidPITSTOP041",
+      "snippet": {
+        "publishedAt": "2022-09-11T19:45:21.061773Z",
+        "channelId": "UCdemoPITSTOPfixture000",
+        "title": "Rust: writing a file watcher in Rust",
+        "description": "In this one I walk through writing a file watcher in Rust end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/vidPITSTOP041/hqdefault.jpg"
+          }
+        },
+        "channelTitle": "Demo Channel",
+        "tags": [
+          "rust",
+          "file"
+        ],
+        "categoryId": "22"
+      },
+      "contentDetails": {
+        "duration": "PT15M10S",
+        "caption": "false"
+      },
+      "statistics": {
+        "viewCount": "42005",
+        "likeCount": "1680",
+        "commentCount": "252"
+      },
+      "status": {
+        "privacyStatus": "public"
+      }
+    }
+  ],
+  "playlists": [
+    {
+      "id": "PLdemoBlender01",
+      "title": "Blender Basics",
+      "item_video_ids": [
+        "vidPITSTOP000",
+        "vidPITSTOP001",
+        "vidPITSTOP006",
+        "vidPITSTOP007",
+        "vidPITSTOP012",
+        "vidPITSTOP013"
+      ],
+      "broken_video_ids": []
+    },
+    {
+      "id": "PLdemoPython01",
+      "title": "Python for Beginners",
+      "item_video_ids": [
+        "vidPITSTOP002",
+        "vidPITSTOP003",
+        "vidPITSTOP008",
+        "vidPITSTOP009",
+        "vidPITSTOP014",
+        "vidPITSTOP037"
+      ],
+      "broken_video_ids": [
+        "vidPITSTOP037"
+      ]
+    }
+  ],
+  "captions": {
+    "vidPITSTOP000": true,
+    "vidPITSTOP001": false,
+    "vidPITSTOP002": false,
+    "vidPITSTOP003": false,
+    "vidPITSTOP004": true,
+    "vidPITSTOP005": false,
+    "vidPITSTOP006": false,
+    "vidPITSTOP007": false,
+    "vidPITSTOP008": true,
+    "vidPITSTOP009": false,
+    "vidPITSTOP010": false,
+    "vidPITSTOP011": false,
+    "vidPITSTOP012": true,
+    "vidPITSTOP013": false,
+    "vidPITSTOP014": false,
+    "vidPITSTOP015": false,
+    "vidPITSTOP016": true,
+    "vidPITSTOP017": false,
+    "vidPITSTOP018": false,
+    "vidPITSTOP019": false,
+    "vidPITSTOP020": true,
+    "vidPITSTOP021": false,
+    "vidPITSTOP022": false,
+    "vidPITSTOP023": false,
+    "vidPITSTOP024": true,
+    "vidPITSTOP025": false,
+    "vidPITSTOP026": false,
+    "vidPITSTOP027": false,
+    "vidPITSTOP028": true,
+    "vidPITSTOP029": false,
+    "vidPITSTOP030": false,
+    "vidPITSTOP031": false,
+    "vidPITSTOP032": true,
+    "vidPITSTOP033": false,
+    "vidPITSTOP034": false,
+    "vidPITSTOP035": false,
+    "vidPITSTOP036": true,
+    "vidPITSTOP037": false,
+    "vidPITSTOP038": false,
+    "vidPITSTOP039": false,
+    "vidPITSTOP040": true,
+    "vidPITSTOP041": false
+  },
+  "retention": {
+    "vidPITSTOP000": 58.0,
+    "vidPITSTOP001": 32.4,
+    "vidPITSTOP002": 37.5,
+    "vidPITSTOP003": 28.4,
+    "vidPITSTOP004": 49.7,
+    "vidPITSTOP005": 51.7,
+    "vidPITSTOP006": 54.9,
+    "vidPITSTOP007": 51.3,
+    "vidPITSTOP008": 59.7,
+    "vidPITSTOP009": 59.0,
+    "vidPITSTOP010": 49.0,
+    "vidPITSTOP011": 56.1,
+    "vidPITSTOP012": 31.2,
+    "vidPITSTOP013": 34.9,
+    "vidPITSTOP014": 31.2,
+    "vidPITSTOP015": 42.9,
+    "vidPITSTOP016": 42.0,
+    "vidPITSTOP017": 61.2,
+    "vidPITSTOP018": 57.1,
+    "vidPITSTOP019": 49.4,
+    "vidPITSTOP020": 29.7,
+    "vidPITSTOP021": 58.7,
+    "vidPITSTOP022": 35.5,
+    "vidPITSTOP023": 43.2,
+    "vidPITSTOP024": 29.7,
+    "vidPITSTOP025": 30.3,
+    "vidPITSTOP026": 39.7,
+    "vidPITSTOP027": 61.7,
+    "vidPITSTOP028": 40.7,
+    "vidPITSTOP029": 61.8,
+    "vidPITSTOP030": 59.1,
+    "vidPITSTOP031": 37.1,
+    "vidPITSTOP032": 52.3,
+    "vidPITSTOP033": 49.0,
+    "vidPITSTOP034": 36.9,
+    "vidPITSTOP035": 31.9,
+    "vidPITSTOP036": 51.9,
+    "vidPITSTOP037": 35.4,
+    "vidPITSTOP038": 46.1,
+    "vidPITSTOP039": 46.6,
+    "vidPITSTOP040": 29.9,
+    "vidPITSTOP041": 41.6
+  }
+}

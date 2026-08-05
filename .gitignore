@@ -1,0 +1,15 @@
+.env
+client_secret.json
+.pitstop/
+*.db
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+node_modules/
+web/dist/
+.DS_Store
+*.egg-info/
+build/
+dist/

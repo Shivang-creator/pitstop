@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+/* Design system.
+
+   Dark-first and deliberately restrained. The report is dense — a channel scan
+   returns a few hundred findings — so colour is reserved almost entirely for
+   severity. If everything is coloured, severity stops reading as severity, and
+   the whole point of the report is that your eye lands on the four things that
+   matter before the ninety that don't. */
+
+@theme {
+  --color-ink-950: #08090b;
+  --color-ink-900: #0d0f13;
+  --color-ink-850: #14171d;
+  --color-ink-800: #1b1f27;
+  --color-ink-700: #262b35;
+  --color-ink-600: #39404d;
+  --color-ink-400: #6b7482;
+  --color-ink-300: #9aa3b0;
+  --color-ink-200: #c7ccd4;
+
+  --color-critical: #ff5d5d;
+  --color-critical-dim: #3d1618;
+  --color-warning: #ffb340;
+  --color-warning-dim: #3a2a10;
+  --color-notice: #58b8ff;
+  --color-notice-dim: #10283d;
+  --color-good: #3ddc97;
+  --color-good-dim: #0f2f24;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-ink-950);
+  color: var(--color-ink-200);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv02", "cv03", "cv04", "tnum";
+}
+
+/* Ambient background — a single fixed radial wash. Cheap, and it stops the
+   dark canvas reading as a terminal. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 500px at 15% -5%, rgba(88, 184, 255, 0.07), transparent 60%),
+    radial-gradient(700px 400px at 90% 0%, rgba(61, 220, 151, 0.05), transparent 55%);
+  z-index: 0;
+}
+
+::selection {
+  background: rgba(88, 184, 255, 0.28);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-700);
+  border-radius: 6px;
+  border: 2px solid var(--color-ink-950);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-600);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pulse-ring {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+.pulse-ring {
+  animation: pulse-ring 1.8s ease-in-out infinite;
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(400%);
+  }
+}
+.sweep {
+  animation: sweep 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
