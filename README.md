@@ -123,6 +123,9 @@ python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 cp .env.example .env
 ```
 
+**Not sure what's configured?** `pitstop doctor` checks your setup and
+names the next step. Click-by-click credential walkthrough: [SETUP.md](SETUP.md).
+
 **Try it immediately, no credentials:**
 
 ```bash

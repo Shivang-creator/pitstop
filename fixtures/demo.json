@@ -26,7 +26,7 @@
     {
       "id": "vidPITSTOP000",
       "snippet": {
-        "publishedAt": "2026-07-06T19:45:21.061773Z",
+        "publishedAt": "2026-07-07T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Blender: modelling a CLI tool in Blender",
         "description": "In this one I walk through modelling a CLI tool in Blender end to end, including the parts that went wrong.\n\nGear I used: https://pitstop-demo-dead-domain-9f3a2b.com/gear\nCourse link: https://httpbin.org/status/404\nResources: https://bit.ly/3xPitstopDemo\n\n00:00 Intro\n03:00 Setup\n04:35 The build\n06:10 Debugging\n10:10 Result\n",
@@ -55,7 +55,7 @@
     {
       "id": "vidPITSTOP001",
       "snippet": {
-        "publishedAt": "2026-06-02T19:45:21.061773Z",
+        "publishedAt": "2026-06-03T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Blender: sculpting a web scraper from scratch",
         "description": "In this one I walk through sculpting a web scraper from scratch end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -90,7 +90,7 @@
     {
       "id": "vidPITSTOP002",
       "snippet": {
-        "publishedAt": "2026-04-29T19:45:21.061773Z",
+        "publishedAt": "2026-04-30T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Python: building a REST API in Python",
         "description": "In this one I walk through building a REST API in Python end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -121,7 +121,7 @@
     {
       "id": "vidPITSTOP003",
       "snippet": {
-        "publishedAt": "2026-03-26T19:45:21.061773Z",
+        "publishedAt": "2026-03-27T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Python: automating game loop with Python",
         "description": "In this one I walk through automating game loop with Python end to end, including the parts that went wrong.\n\n\n00:00 Intro\n02:10 Setup\n06:10 The build\n08:20 Debugging\n09:55 Result\n11:30 What I'd change\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -152,7 +152,7 @@
     {
       "id": "vidPITSTOP004",
       "snippet": {
-        "publishedAt": "2026-02-20T19:45:21.061773Z",
+        "publishedAt": "2026-02-21T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Docker: deploying a chat bot with Docker",
         "description": "In this one I walk through deploying a chat bot with Docker end to end, including the parts that went wrong.\n\n\n00:42 Intro\n03:42 Setup\n07:42 The build\n09:52 Debugging\n",
@@ -183,7 +183,7 @@
     {
       "id": "vidPITSTOP005",
       "snippet": {
-        "publishedAt": "2026-01-17T19:45:21.061773Z",
+        "publishedAt": "2026-01-18T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Rust: writing a dashboard in Rust",
         "description": "In this one I walk through writing a dashboard in Rust end to end, including the parts that went wrong.\n\nResources: https://bit.ly/3xPitstopDemo\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -215,7 +215,7 @@
     {
       "id": "vidPITSTOP006",
       "snippet": {
-        "publishedAt": "2025-12-14T19:45:21.061773Z",
+        "publishedAt": "2025-12-15T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Blender: modelling a parser in Blender",
         "description": "In this one I walk through modelling a parser in Blender end to end, including the parts that went wrong.\n\n\n00:00 Intro\n02:10 Setup\n04:20 The build\n08:20 Debugging\n10:30 Result\n14:30 What I'd change\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -244,7 +244,7 @@
     {
       "id": "vidPITSTOP007",
       "snippet": {
-        "publishedAt": "2025-11-10T19:45:21.061773Z",
+        "publishedAt": "2025-11-11T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Blender: sculpting a renderer from scratch",
         "description": "In this one I walk through sculpting a renderer from scratch end to end, including the parts that went wrong.\n\nGear I used: https://pitstop-demo-dead-domain-9f3a2b.com/gear\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -276,7 +276,7 @@
     {
       "id": "vidPITSTOP008",
       "snippet": {
-        "publishedAt": "2025-10-07T19:45:21.061773Z",
+        "publishedAt": "2025-10-08T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Python: building a task queue in Python \u2014 the complete start-to-finish walkthrough for absolute beginners in 2026",
         "description": "In this one I walk through building a task queue in Python end to end, including the parts that went wrong.\n\n",
@@ -310,7 +310,7 @@
     {
       "id": "vidPITSTOP009",
       "snippet": {
-        "publishedAt": "2025-09-03T19:45:21.061773Z",
+        "publishedAt": "2025-09-04T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Python: automating log viewer with Python",
         "description": "In this one I walk through automating log viewer with Python end to end, including the parts that went wrong.\n\n\n00:00 Intro\n03:00 Setup\n07:00 The build\n11:00 Debugging\n13:10 Result\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -341,7 +341,7 @@
     {
       "id": "vidPITSTOP010",
       "snippet": {
-        "publishedAt": "2025-07-31T19:45:21.061773Z",
+        "publishedAt": "2025-08-01T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Docker: deploying a portfolio site with Docker",
         "description": "In this one I walk through deploying a portfolio site with Docker end to end, including the parts that went wrong.\n\nResources: https://bit.ly/3xPitstopDemo\n\n00:42 Intro\n02:52 Setup\n04:27 The build\n07:27 Debugging\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -373,7 +373,7 @@
     {
       "id": "vidPITSTOP011",
       "snippet": {
-        "publishedAt": "2025-06-27T19:45:21.061773Z",
+        "publishedAt": "2025-06-28T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Rust: writing a URL shortener in Rust",
         "description": "In this one I walk through writing a URL shortener in Rust end to end, including the parts that went wrong.\n\nCourse link: https://httpbin.org/status/404\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -404,7 +404,7 @@
     {
       "id": "vidPITSTOP012",
       "snippet": {
-        "publishedAt": "2025-05-24T19:45:21.061773Z",
+        "publishedAt": "2025-05-25T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Blender: modelling a note app in Blender",
         "description": "In this one I walk through modelling a note app in Blender end to end, including the parts that went wrong.\n\n\n00:00 Intro\n03:00 Setup\n05:10 The build\n09:10 Debugging\n11:20 Result\n14:20 What I'd change\n",
@@ -433,7 +433,7 @@
     {
       "id": "vidPITSTOP013",
       "snippet": {
-        "publishedAt": "2025-04-20T19:45:21.061773Z",
+        "publishedAt": "2025-04-21T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Blender: sculpting a file watcher from scratch",
         "description": "In this one I walk through sculpting a file watcher from scratch end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -466,7 +466,7 @@
     {
       "id": "vidPITSTOP014",
       "snippet": {
-        "publishedAt": "2025-03-17T19:45:21.061773Z",
+        "publishedAt": "2025-03-18T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Python: building a CLI tool in Python",
         "description": "Huge thanks to Acme Cloud for sponsoring this video. Use code BUILD20 for 20% off.\n\nIn this one I walk through building a CLI tool in Python end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -501,7 +501,7 @@
     {
       "id": "vidPITSTOP015",
       "snippet": {
-        "publishedAt": "2025-02-11T19:45:21.061773Z",
+        "publishedAt": "2025-02-12T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Python: automating web scraper with Python",
         "description": "In this one I walk through automating web scraper with Python end to end, including the parts that went wrong.\n\nResources: https://bit.ly/3xPitstopDemo\n\n00:00 Intro\n03:00 Setup\n07:00 The build\n10:00 Debugging\n13:00 Result\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -534,7 +534,7 @@
     {
       "id": "vidPITSTOP016",
       "snippet": {
-        "publishedAt": "2025-01-08T19:45:21.061773Z",
+        "publishedAt": "2025-01-09T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Docker: deploying a REST API with Docker",
         "description": "In this one I walk through deploying a REST API with Docker end to end, including the parts that went wrong.\n\n\n00:42 Intro\n02:17 Setup\n05:17 The build\n08:17 Debugging\n",
@@ -568,7 +568,7 @@
     {
       "id": "vidPITSTOP017",
       "snippet": {
-        "publishedAt": "2024-12-05T19:45:21.061773Z",
+        "publishedAt": "2024-12-06T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Rust: writing a game loop in Rust",
         "description": "",
@@ -603,7 +603,7 @@
     {
       "id": "vidPITSTOP018",
       "snippet": {
-        "publishedAt": "2024-11-01T19:45:21.061773Z",
+        "publishedAt": "2024-11-02T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Blender: modelling a chat bot in Blender",
         "description": "In this one I walk through modelling a chat bot in Blender end to end, including the parts that went wrong.\n\n\n00:00 Intro\n04:00 Setup\n06:10 The build\n07:45 Debugging\n09:20 Result\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -632,7 +632,7 @@
     {
       "id": "vidPITSTOP019",
       "snippet": {
-        "publishedAt": "2024-09-28T19:45:21.061773Z",
+        "publishedAt": "2024-09-29T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Blender: sculpting a dashboard from scratch",
         "description": "In this one I walk through sculpting a dashboard from scratch end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -665,7 +665,7 @@
     {
       "id": "vidPITSTOP020",
       "snippet": {
-        "publishedAt": "2024-08-25T19:45:21.061773Z",
+        "publishedAt": "2024-08-26T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Python: building a parser in Python",
         "description": "In this one I walk through building a parser in Python end to end, including the parts that went wrong.\n\nResources: https://bit.ly/3xPitstopDemo\n",
@@ -700,7 +700,7 @@
     {
       "id": "vidPITSTOP021",
       "snippet": {
-        "publishedAt": "2024-07-22T19:45:21.061773Z",
+        "publishedAt": "2024-07-23T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Python: automating renderer with Python",
         "description": "In this one I walk through automating renderer with Python end to end, including the parts that went wrong.\n\nGear I used: https://pitstop-demo-dead-domain-9f3a2b.com/gear\n\n00:00 Intro\n01:35 Setup\n03:10 The build\n04:45 Debugging\n06:55 Result\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -731,7 +731,7 @@
     {
       "id": "vidPITSTOP022",
       "snippet": {
-        "publishedAt": "2024-06-18T19:45:21.061773Z",
+        "publishedAt": "2024-06-19T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Docker: deploying a task queue with Docker",
         "description": "In this one I walk through deploying a task queue with Docker end to end, including the parts that went wrong.\n\nCourse link: https://httpbin.org/status/404\n\n00:42 Intro\n02:17 Setup\n06:17 The build\n09:17 Debugging\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -764,7 +764,7 @@
     {
       "id": "vidPITSTOP023",
       "snippet": {
-        "publishedAt": "2024-05-15T19:45:21.061773Z",
+        "publishedAt": "2024-05-16T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "VID_20240417_final2.mp4",
         "description": "In this one I walk through writing a log viewer in Rust end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -799,7 +799,7 @@
     {
       "id": "vidPITSTOP024",
       "snippet": {
-        "publishedAt": "2024-04-11T19:45:21.061773Z",
+        "publishedAt": "2024-04-12T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Blender: modelling a portfolio site in Blender",
         "description": "In this one I walk through modelling a portfolio site in Blender end to end, including the parts that went wrong.\n\n\n00:00 Intro\n03:00 Setup\n05:10 The build\n06:45 Debugging\n",
@@ -828,7 +828,7 @@
     {
       "id": "vidPITSTOP025",
       "snippet": {
-        "publishedAt": "2024-03-08T19:45:21.061773Z",
+        "publishedAt": "2024-03-09T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Blender: sculpting a URL shortener from scratch",
         "description": "In this one I walk through sculpting a URL shortener from scratch end to end, including the parts that went wrong.\n\nResources: https://bit.ly/3xPitstopDemo\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -859,7 +859,7 @@
     {
       "id": "vidPITSTOP026",
       "snippet": {
-        "publishedAt": "2024-02-03T19:45:21.061773Z",
+        "publishedAt": "2024-02-04T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Python: building a note app in Python",
         "description": "In this one I walk through building a note app in Python end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -892,7 +892,7 @@
     {
       "id": "vidPITSTOP027",
       "snippet": {
-        "publishedAt": "2023-12-31T19:45:21.061773Z",
+        "publishedAt": "2024-01-01T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Python: automating file watcher with Python",
         "description": "In this one I walk through automating file watcher with Python end to end, including the parts that went wrong.\n\n\n00:00 Intro\n02:10 Setup\n05:10 The build\n09:10 Debugging\n13:10 Result\n15:20 What I'd change\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -927,7 +927,7 @@
     {
       "id": "vidPITSTOP028",
       "snippet": {
-        "publishedAt": "2023-11-27T19:45:21.061773Z",
+        "publishedAt": "2023-11-28T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Docker: deploying a CLI tool with Docker",
         "description": "In this one I walk through deploying a CLI tool with Docker end to end, including the parts that went wrong.\n\nGear I used: https://pitstop-demo-dead-domain-9f3a2b.com/gear\n\n00:42 Intro\n03:42 Setup\n06:42 The build\n08:52 Debugging\n",
@@ -960,7 +960,7 @@
     {
       "id": "vidPITSTOP029",
       "snippet": {
-        "publishedAt": "2023-10-24T19:45:21.061773Z",
+        "publishedAt": "2023-10-25T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Rust: writing a web scraper in Rust",
         "description": "In this one I walk through writing a web scraper in Rust end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -994,7 +994,7 @@
     {
       "id": "vidPITSTOP030",
       "snippet": {
-        "publishedAt": "2023-09-20T19:45:21.061773Z",
+        "publishedAt": "2023-09-21T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Blender: modelling a REST API in Blender",
         "description": "In this one I walk through modelling a REST API in Blender end to end, including the parts that went wrong.\n\nResources: https://bit.ly/3xPitstopDemo\n\n00:00 Intro\n03:00 Setup\n04:35 The build\n07:35 Debugging\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -1023,7 +1023,7 @@
     {
       "id": "vidPITSTOP031",
       "snippet": {
-        "publishedAt": "2023-08-17T19:45:21.061773Z",
+        "publishedAt": "2023-08-18T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Blender: sculpting a game loop from scratch",
         "description": "",
@@ -1057,7 +1057,7 @@
     {
       "id": "vidPITSTOP032",
       "snippet": {
-        "publishedAt": "2023-07-14T19:45:21.061773Z",
+        "publishedAt": "2023-07-15T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Python: building a chat bot in Python",
         "description": "In this one I walk through building a chat bot in Python end to end, including the parts that went wrong.\n\n",
@@ -1091,7 +1091,7 @@
     {
       "id": "vidPITSTOP033",
       "snippet": {
-        "publishedAt": "2023-06-10T19:45:21.061773Z",
+        "publishedAt": "2023-06-11T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Python: automating dashboard with Python",
         "description": "In this one I walk through automating dashboard with Python end to end, including the parts that went wrong.\n\nCourse link: https://httpbin.org/status/404\n\n00:00 Intro\n02:10 Setup\n04:20 The build\n07:20 Debugging\n09:30 Result\n13:30 What I'd change\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -1124,7 +1124,7 @@
     {
       "id": "vidPITSTOP034",
       "snippet": {
-        "publishedAt": "2023-05-07T19:45:21.061773Z",
+        "publishedAt": "2023-05-08T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Docker: deploying a parser with Docker",
         "description": "In this one I walk through deploying a parser with Docker end to end, including the parts that went wrong.\n\n\n00:42 Intro\n02:52 Setup\n06:52 The build\n09:02 Debugging\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -1158,7 +1158,7 @@
     {
       "id": "vidPITSTOP035",
       "snippet": {
-        "publishedAt": "2023-04-03T19:45:21.061773Z",
+        "publishedAt": "2023-04-04T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Rust: writing a renderer in Rust",
         "description": "In this one I walk through writing a renderer in Rust end to end, including the parts that went wrong.\n\nGear I used: https://pitstop-demo-dead-domain-9f3a2b.com/gear\nResources: https://bit.ly/3xPitstopDemo\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -1191,7 +1191,7 @@
     {
       "id": "vidPITSTOP036",
       "snippet": {
-        "publishedAt": "2023-02-28T19:45:21.061773Z",
+        "publishedAt": "2023-03-01T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Blender: modelling a task queue in Blender",
         "description": "In this one I walk through modelling a task queue in Blender end to end, including the parts that went wrong.\n\n\n00:00 Intro\n03:00 Setup\n04:35 The build\n08:35 Debugging\n12:35 Result\n",
@@ -1220,7 +1220,7 @@
     {
       "id": "vidPITSTOP037",
       "snippet": {
-        "publishedAt": "2023-01-25T19:45:21.061773Z",
+        "publishedAt": "2023-01-26T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Blender: sculpting a log viewer from scratch",
         "description": "In this one I walk through sculpting a log viewer from scratch end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -1252,7 +1252,7 @@
     {
       "id": "vidPITSTOP038",
       "snippet": {
-        "publishedAt": "2022-12-22T19:45:21.061773Z",
+        "publishedAt": "2022-12-23T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Python: building a portfolio site in Python",
         "description": "In this one I walk through building a portfolio site in Python end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -1283,7 +1283,7 @@
     {
       "id": "vidPITSTOP039",
       "snippet": {
-        "publishedAt": "2022-11-18T19:45:21.061773Z",
+        "publishedAt": "2022-11-19T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Python: automating URL shortener with Python",
         "description": "In this one I walk through automating URL shortener with Python end to end, including the parts that went wrong.\n\n\n00:00 Intro\n03:00 Setup\n07:00 The build\n10:00 Debugging\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",
@@ -1315,7 +1315,7 @@
     {
       "id": "vidPITSTOP040",
       "snippet": {
-        "publishedAt": "2022-10-15T19:45:21.061773Z",
+        "publishedAt": "2022-10-16T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Docker: deploying a note app with Docker",
         "description": "In this one I walk through deploying a note app with Docker end to end, including the parts that went wrong.\n\nResources: https://bit.ly/3xPitstopDemo\n\n00:42 Intro\n02:52 Setup\n05:02 The build\n06:37 Debugging\n",
@@ -1347,7 +1347,7 @@
     {
       "id": "vidPITSTOP041",
       "snippet": {
-        "publishedAt": "2022-09-11T19:45:21.061773Z",
+        "publishedAt": "2022-09-12T13:56:52.235421Z",
         "channelId": "UCdemoPITSTOPfixture000",
         "title": "Rust: writing a file watcher in Rust",
         "description": "In this one I walk through writing a file watcher in Rust end to end, including the parts that went wrong.\n\n\n\u2500\u2500 \u2500\u2500 \u2500\u2500\nSubscribe: https://www.youtube.com/@YouTube?sub_confirmation=1\nEverything I use: https://github.com/features/actions\n",

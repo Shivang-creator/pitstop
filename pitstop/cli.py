@@ -14,6 +14,7 @@ four findings that matter under the ninety that don't.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 from typing import Optional
@@ -30,7 +31,7 @@ from rich.text import Text
 from . import score as scoring
 from .catalog import fetch_catalog
 from .checks import CheckContext, all_checks, run_all
-from .config import CONFIG
+from .config import CONFIG, ROOT as ROOT_DIR
 from .models import Catalog, Finding, Severity
 from .planner import build_plan, split_by_budget
 from .quota import QuotaLedger, estimate_fetch_cost
@@ -463,6 +464,139 @@ def auth():
             raise typer.Exit(0)
         raise
     console.print(f"  [bold green]✓[/] Authenticated as [bold]{channel.title}[/]\n")
+
+
+@app.command()
+def doctor():
+    """Check your setup and say exactly what's missing and how to fix it."""
+    console.print()
+    console.print(Panel(Text("Pitstop setup check", style="bold white"),
+                        border_style="bright_black", padding=(0, 2)))
+    console.print()
+
+    env_file = ROOT_DIR / ".env"
+    rows: list[tuple[str, bool, str, str]] = []
+
+    # 1. .env exists
+    rows.append((
+        ".env file",
+        env_file.exists(),
+        str(env_file),
+        f"Create it: cp .env.example .env",
+    ))
+
+    # 2. API key
+    key = CONFIG.api_key
+    key_ok = bool(key) and len(key) > 20
+    if key and not key_ok:
+        hint = f"Key looks too short ({len(key)} chars) — expected ~39."
+    else:
+        hint = "Add YOUTUBE_API_KEY=... to .env  (see SETUP.md step 1)"
+    rows.append((
+        "YouTube API key",
+        key_ok,
+        f"{key[:8]}…{key[-4:]} ({len(key)} chars)" if key_ok else "not set",
+        hint,
+    ))
+
+    # 3. OAuth client secret
+    secret = CONFIG.client_secret_file
+    secret_ok = secret.exists()
+    detail = str(secret)
+    hint = ("Download the OAuth client JSON and save it as "
+            f"{secret.name} in {ROOT_DIR}  (see SETUP.md step 2)")
+    if secret_ok:
+        try:
+            data = json.loads(secret.read_text(encoding="utf-8"))
+            kind = "installed" if "installed" in data else (
+                "web" if "web" in data else "unknown")
+            if kind == "installed":
+                detail = f"{secret.name} · Desktop app ✓"
+            elif kind == "web":
+                secret_ok = False
+                detail = f"{secret.name} · type is 'Web application'"
+                hint = ("Wrong client type. Create a new OAuth client and pick "
+                        "'Desktop app' — a Web client cannot do the local "
+                        "loopback login Pitstop uses.")
+            else:
+                secret_ok = False
+                detail = f"{secret.name} · unrecognised format"
+                hint = "This doesn't look like a Google OAuth client file."
+        except (json.JSONDecodeError, OSError) as exc:
+            secret_ok = False
+            detail = f"{secret.name} · unreadable"
+            hint = f"Could not parse it: {exc}"
+    else:
+        detail = "not found"
+    rows.append(("OAuth client (Desktop app)", secret_ok, detail, hint))
+
+    # 4. Token
+    token_ok = CONFIG.token_file.exists()
+    rows.append((
+        "Signed in (pitstop auth)",
+        token_ok,
+        str(CONFIG.token_file) if token_ok else "not signed in yet",
+        "Run: pitstop auth",
+    ))
+
+    # 5. Fixture
+    fixtures = sorted(p.stem for p in (ROOT_DIR / "fixtures").glob("*.json"))
+    rows.append((
+        "Offline demo fixture",
+        bool(fixtures),
+        ", ".join(fixtures) if fixtures else "none",
+        "Run: python scripts/make_fixture.py",
+    ))
+
+    table = Table(box=None, padding=(0, 2), show_header=True,
+                  header_style="dim")
+    table.add_column("", width=2)
+    table.add_column("What")
+    table.add_column("Status", style="dim")
+
+    for label, ok, detail, _ in rows:
+        table.add_row("[green]✓[/]" if ok else "[red]✗[/]", label, detail)
+    console.print(table)
+
+    # --- what you can do right now -----------------------------------------
+    console.print()
+    console.print(Rule("[dim]What you can do right now[/]",
+                       style="bright_black"))
+    console.print()
+
+    can_fixture = bool(fixtures)
+    can_public = key_ok
+    can_apply = secret_ok and token_ok
+
+    def line(ok: bool, text: str, cmd: str) -> None:
+        mark = "[green]✓[/]" if ok else "[dim]·[/]"
+        body = text if ok else f"[dim]{text}[/]"
+        console.print(f"  {mark} {body}")
+        console.print(f"      [{'cyan' if ok else 'dim'}]{cmd}[/]")
+
+    line(can_fixture, "Run the whole pipeline offline, no credentials",
+         "pitstop scan demo --fixture demo")
+    line(can_public, "Scan any real public channel",
+         "pitstop scan @mkbhd --limit 100")
+    line(can_apply, "Repair your own channel",
+         "pitstop plan @shivangshirodkar4518")
+
+    # --- next action --------------------------------------------------------
+    blocked = [(label, hint) for label, ok, _, hint in rows if not ok]
+    console.print()
+    if not blocked:
+        console.print("  [bold green]Everything is set up.[/]\n")
+        return
+
+    console.print(Rule("[dim]Next step[/]", style="bright_black"))
+    console.print()
+    label, hint = blocked[0]
+    console.print(f"  [bold]{label}[/]")
+    console.print(f"  [dim]{hint}[/]")
+    if len(blocked) > 1:
+        console.print(f"\n  [dim]Then {len(blocked) - 1} more — re-run "
+                      f"[cyan]pitstop doctor[/][dim] after each.[/]")
+    console.print(f"\n  [dim]Full walkthrough: {ROOT_DIR / 'SETUP.md'}[/]\n")
 
 
 @app.command()
