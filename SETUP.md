@@ -34,7 +34,10 @@ full pipeline right now:
 # STEP 0 — Create the project (2 min)
 
 1. Go to **[console.cloud.google.com](https://console.cloud.google.com)** and
-   sign in with `zingua816@gmail.com` (the account that owns your channel).
+   sign in with **the Google account that owns your YouTube channel** —
+   the one you use for YouTube Studio. It does not have to be the account
+   that owns any other subscription, and getting this wrong is the most
+   common cause of `access_denied` later.
 2. Top-left, click the **project dropdown** (says "Select a project" or shows a
    current project name) → **NEW PROJECT**.
 3. Name: `pitstop` → **CREATE**. Wait ~10 seconds.
@@ -117,9 +120,32 @@ leaks, it can only do the one harmless thing.
 
 ---
 
-# STEP 2 — OAuth client (5 min)
+# STEP 2 — OAuth client
 
 **This unlocks writing to your own channel — the `apply` money shot.**
+
+## The easy way
+
+```bash
+cd ~/Projects/pitstop
+.venv/bin/pitstop connect
+```
+
+It asks which Google account owns your channel, then opens each console page
+in turn and tells you the one thing to click on that page. At the end it finds
+the downloaded credential in your Downloads folder, files it, and signs you in.
+
+Four pages, one action each. **Use this.** Everything below is the same thing
+written out by hand, kept for reference if the guided flow breaks.
+
+> ⚠️ **Which Google account?** The one that owns the YouTube channel — the
+> account you log into YouTube Studio with. Not whoever pays for anything else.
+> If your browser is signed into a different Google account, switch it first or
+> use a private window. This is the single most common thing to get wrong.
+
+---
+
+## The manual way (reference)
 
 Google's console is mid-redesign, so you may see either of two layouts. Both
 are listed; use whichever you get.
@@ -133,7 +159,7 @@ are listed; use whichever you get.
 3. Scroll down → **Developer contact information**: your email → **SAVE**.
 4. Left menu → **Audience** → under *User type* choose **External** → **SAVE**.
 5. Still on **Audience**, find **Test users** → **+ ADD USERS** → type
-   `zingua816@gmail.com` → **SAVE**.
+   **the channel owner's email** → **SAVE**.
 
 **If you see "OAuth consent screen" under APIs & Services** (older layout):
 
@@ -142,7 +168,7 @@ are listed; use whichever you get.
 3. App name `Pitstop`, support email = yours, developer contact = yours →
    **SAVE AND CONTINUE**.
 4. Scopes page → **SAVE AND CONTINUE** (skip it, the app requests scopes itself).
-5. Test users → **+ ADD USERS** → `zingua816@gmail.com` → **SAVE AND CONTINUE**.
+5. Test users → **+ ADD USERS** → **the channel owner's email** → **SAVE AND CONTINUE**.
 
 > **Leave it in "Testing" mode. Do not click "Publish app".** Testing mode lets
 > you use sensitive scopes immediately with no Google verification review.
@@ -176,7 +202,7 @@ cd ~/Projects/pitstop
 .venv/bin/pitstop auth
 ```
 
-Your browser opens. Sign in as `zingua816@gmail.com`.
+Your browser opens. Sign in as **the channel owner's account**.
 
 > You'll hit a scary **"Google hasn't verified this app"** screen. That's
 > expected in Testing mode — it's *your* app. Click **Advanced** → **Go to
@@ -223,7 +249,7 @@ cd web && npm run build && cd ..
 | `No channel found for '@...'` | Key is in a different project than the enabled API | Check the project dropdown says `pitstop`; re-create the key inside it |
 | `403 accessNotConfigured` | YouTube Data API v3 not enabled | Library → search it → **ENABLE**, wait 60s |
 | `403 quotaExceeded` | Burned 10,000 units today | Resets midnight Pacific. Use `--limit 50` while testing |
-| `access_denied` in browser | Your email isn't a test user | Audience → Test users → add `zingua816@gmail.com` |
+| `access_denied` in browser | Your email isn't a test user | Audience → Test users → add the channel owner's email |
 | `redirect_uri_mismatch` | Client type is "Web application" | Create a new client, pick **Desktop app** |
 | Token stopped working after a week | Testing-mode tokens expire in 7 days | `rm .pitstop/token.json && pitstop auth` |
 | Can't see `.env` in Finder | macOS hides dotfiles | **⌘ + Shift + .** — or use `code ~/Projects/pitstop/.env` |

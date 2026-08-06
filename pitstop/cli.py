@@ -439,9 +439,17 @@ def apply(
                       f"{'@' + catalog.channel.handle if catalog.channel.handle else 'channel/' + catalog.channel.id}/videos[/]\n")
 
 
+@app.command(name="connect")
+def connect():
+    """Guided setup to connect your channel. Start here — it opens each page."""
+    from .setup_oauth import run
+
+    raise typer.Exit(run())
+
+
 @app.command()
 def auth():
-    """One-time OAuth so Pitstop can read analytics and write to your channel."""
+    """Sign in, once you already have client_secret.json. See `connect`."""
     if not CONFIG.has_oauth:
         console.print(
             f"\n[bold red]✗[/] No OAuth client at "
@@ -510,8 +518,7 @@ def doctor():
     secret = CONFIG.client_secret_file
     secret_ok = secret.exists()
     detail = str(secret)
-    hint = ("Download the OAuth client JSON and save it as "
-            f"{secret.name} in {ROOT_DIR}  (see SETUP.md step 2)")
+    hint = "Run: pitstop connect   (guided — opens each page for you)"
     if secret_ok:
         try:
             data = json.loads(secret.read_text(encoding="utf-8"))
@@ -540,10 +547,11 @@ def doctor():
     # 4. Token
     token_ok = CONFIG.token_file.exists()
     rows.append((
-        "Signed in (pitstop auth)",
+        "Signed in",
         token_ok,
         str(CONFIG.token_file) if token_ok else "not signed in yet",
-        "Run: pitstop auth",
+        ("Run: pitstop auth" if secret_ok
+         else "Run: pitstop connect   (does this at the end)"),
     ))
 
     # 5. Fixture
