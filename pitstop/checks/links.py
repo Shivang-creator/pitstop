@@ -49,7 +49,33 @@ CONCURRENCY = 12
 class LinkStatus:
     ALIVE = "alive"
     DEAD = "dead"
-    UNVERIFIED = "unverified"
+    BLOCKED = "blocked"        # host refuses bots — works fine for humans
+    UNVERIFIED = "unverified"  # transient or ambiguous; we do not guess
+
+
+# Only these mean "the resource is genuinely gone".
+DEAD_CODES = {404, 410}
+
+# The host is refusing *us*, not the viewer. openai.com, Amazon, Cloudflare-
+# fronted sites and most short-link services return these to any programmatic
+# request while serving a real page to a browser. Reporting them as dead is a
+# false positive on the one check people will judge the whole tool by — so
+# they are never reported at all.
+BLOCKED_CODES = {401, 403, 405, 406, 429, 999}
+
+
+def _classify(code: int) -> str:
+    if code in DEAD_CODES:
+        return LinkStatus.DEAD
+    if code in BLOCKED_CODES:
+        return LinkStatus.BLOCKED
+    if code >= 500:
+        # Could be a real outage, could be the host having a bad minute. Not
+        # enough to tell someone their link is gone.
+        return LinkStatus.UNVERIFIED
+    if code >= 400:
+        return LinkStatus.UNVERIFIED
+    return LinkStatus.ALIVE
 
 
 async def _probe(client: httpx.AsyncClient, url: str,
@@ -59,33 +85,36 @@ async def _probe(client: httpx.AsyncClient, url: str,
         host = httpx.URL(url).host or ""
         methods = ["GET"] if any(h in host for h in GET_ONLY_HOSTS) else ["HEAD", "GET"]
         last_exc: Exception | None = None
-        for attempt, method in enumerate(methods):
+
+        for method in methods:
             try:
                 resp = await client.request(method, url,
                                             follow_redirects=True,
                                             timeout=TIMEOUT)
-                if resp.status_code in (405, 501) and method == "HEAD":
-                    continue  # fall through to GET
-                if resp.status_code >= 400:
-                    return LinkStatus.DEAD, resp.status_code, str(resp.url)
-                return LinkStatus.ALIVE, resp.status_code, str(resp.url)
+                status = _classify(resp.status_code)
+                # A HEAD that comes back 4xx often just means the host dislikes
+                # HEAD. Confirm with GET before believing it.
+                if method == "HEAD" and status is not LinkStatus.ALIVE:
+                    continue
+                return status, resp.status_code, str(resp.url)
             except (httpx.ConnectError, httpx.ReadError) as exc:
                 last_exc = exc
                 continue
             except httpx.HTTPError as exc:
                 last_exc = exc
                 break
-        # Connection-level failure. Retry once before calling it dead; a single
-        # transient failure is not evidence enough to tell someone to edit 40
-        # descriptions.
+
+        # Connection-level failure. Retry once before calling it dead — a
+        # single transient failure is not evidence enough to tell someone to
+        # edit forty descriptions.
         try:
             resp = await client.get(url, follow_redirects=True, timeout=TIMEOUT)
-            if resp.status_code >= 400:
-                return LinkStatus.DEAD, resp.status_code, str(resp.url)
-            return LinkStatus.ALIVE, resp.status_code, str(resp.url)
+            return _classify(resp.status_code), resp.status_code, str(resp.url)
+        except httpx.ConnectError:
+            # DNS failure or refused connection, twice. The domain is gone.
+            return LinkStatus.DEAD, None, url
         except httpx.HTTPError:
-            if isinstance(last_exc, httpx.ConnectError):
-                return LinkStatus.DEAD, None, url
+            _ = last_exc
             return LinkStatus.UNVERIFIED, None, url
 
 
@@ -148,11 +177,15 @@ class DeadLinkCheck(BaseCheck):
 
         for url, videos in unique.items():
             status, code, final = cache.get(url, (LinkStatus.UNVERIFIED, None, url))
+            # BLOCKED and UNVERIFIED are deliberately silent. A creator told to
+            # go edit forty descriptions because a host blocks bots would stop
+            # trusting every other finding in the report.
             if status != LinkStatus.DEAD:
                 continue
             for video in videos:
                 monthly = int(video.views_per_day * 30)
-                reason = f"HTTP {code}" if code else "connection refused"
+                reason = (f"HTTP {code}" if code
+                          else "domain does not resolve")
                 yield Finding(
                     check_id=self.id,
                     severity=Severity.CRITICAL,

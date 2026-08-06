@@ -359,3 +359,159 @@ def test_every_check_declares_an_id_name_and_description():
 def test_check_ids_are_unique():
     ids = [c.id for c in all_checks()]
     assert len(ids) == len(set(ids))
+
+
+# --- false-positive regressions ---------------------------------------------
+# Both of these were found by running against real channels, not by unit tests.
+# They are the two ways this tool could lose a creator's trust outright.
+
+
+@pytest.mark.parametrize("code,expected", [
+    (404, "dead"),        # gone
+    (410, "dead"),        # gone, deliberately
+    (403, "blocked"),     # openai.com, Cloudflare — fine in a browser
+    (401, "blocked"),
+    (429, "blocked"),     # rate-limited, not gone
+    (500, "unverified"),  # host having a bad minute
+    (503, "unverified"),
+    (200, "alive"),
+    (301, "alive"),
+])
+def test_only_404_and_410_count_as_dead(code, expected):
+    """403 is the big one. openai.com and most short-link hosts return it to
+    any programmatic request while serving a real page to humans. Calling
+    those dead is a false positive on the flagship check."""
+    from pitstop.checks.links import _classify
+    assert _classify(code) == expected
+
+
+def test_blocked_links_are_never_reported():
+    from pitstop.checks.links import DeadLinkCheck, LinkStatus
+
+    url = "https://openai.com/index/whatever/"
+    v = video(description=f"read more: {url}")
+    ctx = CheckContext(has_network=True, rules={})
+    ctx.cache["link_status"] = {url: (LinkStatus.BLOCKED, 403, url)}
+
+    assert not list(DeadLinkCheck().run(catalog([v]), ctx))
+
+
+def test_dead_links_are_still_reported():
+    from pitstop.checks.links import DeadLinkCheck, LinkStatus
+
+    url = "https://example.com/gone"
+    v = video(description=f"gear: {url}")
+    ctx = CheckContext(has_network=True, rules={})
+    ctx.cache["link_status"] = {url: (LinkStatus.DEAD, 404, url)}
+
+    findings = list(DeadLinkCheck().run(catalog([v]), ctx))
+    assert len(findings) == 1
+    assert findings[0].severity is Severity.CRITICAL
+
+
+@pytest.mark.parametrize("description", [
+    "Use code FIREsomething for 25% off my course",
+    "Get 20% off with discount code LAUNCH",
+    "Grab the course: https://fireship.io/pro",
+])
+def test_own_product_promo_codes_are_not_sponsorships(description):
+    """A creator discounting their OWN product is not a paid promotion. An
+    earlier cut of this check flagged 35 of 80 Fireship videos on 'use code'
+    alone — every one a false positive."""
+    assert not list(MissingDisclosureCheck().run(
+        catalog([video(description=description)]), CTX))
+
+
+@pytest.mark.parametrize("description", [
+    "This video is sponsored by Acme Cloud.",
+    "Thanks to Acme for sponsoring this video!",
+    "Paid partnership with Acme.",
+    "In partnership with Acme Corp.",
+])
+def test_real_sponsorships_without_disclosure_are_caught(description):
+    findings = list(MissingDisclosureCheck().run(
+        catalog([video(description=description)]), CTX))
+    assert len(findings) == 1
+    assert findings[0].severity is Severity.CRITICAL
+
+
+def test_affiliate_mention_is_its_own_disclosure():
+    """'affiliate' used to sit in both the trigger list and the disclosure
+    list, so a description flagged and cleared itself depending on match
+    order."""
+    v = video(description="Sponsored by Acme. These are affiliate links.")
+    assert not list(MissingDisclosureCheck().run(catalog([v]), CTX))
+
+
+def test_generic_words_cannot_carry_a_playlist_suggestion():
+    """Regression: a video titled "The safest way to store Bitcoin was just
+    hacked" was suggested for a "Backend Development" playlist, because the
+    single generic tag word "development" cleared a half-coverage threshold.
+    Playlist adds are auto-fixable, so that would really have moved it."""
+    from pitstop.checks.playlists import _suggest_playlist
+
+    # Every video carries the same generic tags, as on a real dev channel.
+    generic_tags = ["webdev", "app development", "tutorial"]
+    videos = [video(f"v{i}", title=f"Topic number {i} explained",
+                    tags=generic_tags) for i in range(12)]
+    bitcoin = video("btc", title="The safest way to store Bitcoin was hacked",
+                    tags=generic_tags)
+    videos.append(bitcoin)
+
+    cat = catalog(videos, [Playlist(id="PL1", title="Backend Development")])
+
+    assert _suggest_playlist(bitcoin, cat) is None
+
+
+def test_distinctive_match_still_suggests():
+    from pitstop.checks.playlists import _suggest_playlist
+
+    videos = [video(f"v{i}", title=f"Assorted topic {i}") for i in range(10)]
+    target = video("k", title="Kubernetes operators from scratch")
+    videos.append(target)
+
+    cat = catalog(videos, [Playlist(id="PL1", title="Kubernetes")])
+
+    assert _suggest_playlist(target, cat) == ("PL1", "Kubernetes")
+
+
+def test_playlist_named_only_with_generic_words_is_never_suggested():
+    """A playlist called "Tutorials" on a channel where everything is a
+    tutorial would otherwise absorb the entire catalog."""
+    from pitstop.checks.playlists import _suggest_playlist
+
+    videos = [video(f"v{i}", title=f"Tutorial {i}: doing things",
+                    tags=["tutorial"]) for i in range(12)]
+    cat = catalog(videos, [Playlist(id="PL1", title="Tutorials")])
+
+    assert _suggest_playlist(videos[0], cat) is None
+
+
+def test_more_specific_playlist_wins():
+    """When two playlists both fully match, the one covering more distinctive
+    words is the better home."""
+    from pitstop.checks.playlists import _suggest_playlist
+
+    videos = [video(f"v{i}", title=f"Filler {i}") for i in range(10)]
+    target = video("t", title="Rust macros from scratch")
+    videos.append(target)
+
+    cat = catalog(videos, [Playlist(id="PL1", title="Rust"),
+                           Playlist(id="PL2", title="Rust Macros")])
+
+    assert _suggest_playlist(target, cat) == ("PL2", "Rust Macros")
+
+
+def test_qualifier_words_do_not_block_a_match():
+    """"Blender Basics" is a playlist about Blender. Requiring a video to also
+    contain the word "basics" would match nothing, so structural qualifiers are
+    stripped from playlist titles before matching."""
+    from pitstop.checks.playlists import _suggest_playlist
+
+    videos = [video(f"v{i}", title=f"Filler {i}") for i in range(10)]
+    target = video("b", title="Blender: modelling a chair")
+    videos.append(target)
+
+    cat = catalog(videos, [Playlist(id="PL1", title="Blender Basics")])
+
+    assert _suggest_playlist(target, cat) == ("PL1", "Blender Basics")

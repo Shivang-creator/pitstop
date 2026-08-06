@@ -143,14 +143,38 @@ POLICIES: tuple[Policy, ...] = (
 )
 
 # Paid-promotion disclosure. Not an ad-suitability rule — a legal one (FTC in
-# the US, ASCI in India) and a YouTube policy requirement. Cheap to check,
-# expensive to get wrong.
-_SPONSOR_HINTS = _p("sponsor(?:ed|ship)?", "paid partnership", "brand deal",
-                    "thanks to .{0,30} for sponsoring", "use code",
-                    "discount code", "affiliate link")
-_DISCLOSURE_HINTS = _p("#ad", "#sponsored", "paid promotion",
-                       "includes paid promotion", "advertisement",
-                       "commissions? (?:from|on)", "affiliate")
+# the US, ASCI in India) and a YouTube policy requirement.
+#
+# Calibrated against real channels, because the obvious version is badly wrong.
+# An earlier cut triggered on "use code" and "discount code" and flagged 35 of
+# 80 Fireship videos — every one a false positive, because creators overwhelm-
+# ingly use promo codes for their OWN products. A check that cries wolf on
+# nearly half a catalog gets the whole report dismissed.
+#
+# Worse, that version listed "affiliate" as *both* a trigger and a disclosure,
+# so a description saying "affiliate link" flagged itself and cleared itself
+# depending on match order.
+#
+# So: only an unambiguous third-party sponsorship triggers this.
+_SPONSOR_HINTS = _p(
+    "sponsored by",
+    "sponsor(?:ed|ship) of this",
+    "paid partnership",
+    "paid promotion",
+    "brand deal",
+    "thanks to .{0,40} for sponsoring",
+    "this video (?:is|was) sponsored",
+    "in partnership with",
+)
+
+# Any of these counts as disclosure. "affiliate" appears only here — a
+# description that says "affiliate link" has already disclosed.
+_DISCLOSURE_HINTS = _p(
+    "#ad", "#sponsored", "#paidpromotion",
+    "paid promotion", "includes paid promotion", "advertisement",
+    "commissions? (?:from|on)", "affiliate",
+    "i (?:may )?earn", "at no (?:extra )?cost to you",
+)
 
 
 @register

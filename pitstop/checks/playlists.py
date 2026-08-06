@@ -27,6 +27,18 @@ _STOPWORDS = {
     "we", "you", "at", "by", "from", "part", "ep", "episode", "vs",
 }
 
+# Words that describe the *shape* of a playlist rather than its subject.
+# "Blender Basics" is a playlist about Blender; requiring a video to also
+# contain the word "basics" would match nothing. Stripped before deciding
+# which words a video must cover.
+_PLAYLIST_QUALIFIERS = {
+    "basics", "beginner", "beginners", "intro", "introduction", "advanced",
+    "series", "tutorial", "tutorials", "guide", "guides", "tips", "tricks",
+    "course", "crash", "complete", "full", "playlist", "videos", "video",
+    "101", "deep", "dive", "dives", "explained", "masterclass", "essentials",
+    "fundamentals", "walkthrough", "walkthroughs", "shorts", "clips",
+}
+
 
 @register
 class OrphanVideoCheck(BaseCheck):
@@ -40,11 +52,13 @@ class OrphanVideoCheck(BaseCheck):
         if not catalog.videos:
             return
         in_playlists = catalog.videos_in_playlists
+        # Computed once for the whole catalog, not per video.
+        generic = _generic_words(catalog)
 
         for video in catalog.videos:
             if video.id in in_playlists or video.privacy_status != "public":
                 continue
-            suggested = _suggest_playlist(video, catalog)
+            suggested = _suggest_playlist(video, catalog, generic)
             fix = None
             if suggested:
                 fix = Fix(field="playlist_add", current=None,
@@ -136,36 +150,69 @@ def _keywords(text: str) -> list[str]:
     return [w for w in words if w not in _STOPWORDS and len(w) > 2]
 
 
-def _suggest_playlist(video, catalog: Catalog) -> tuple[str, str] | None:
-    """Pick the existing playlist whose title best overlaps this video's.
+def _generic_words(catalog: Catalog) -> set[str]:
+    """Words so common across this channel that they carry no signal.
 
-    Deliberately dumb and explainable — token overlap, not embeddings. A
-    creator reviewing 60 proposed playlist additions in `plan` needs to be able
-    to see *why* each one was suggested at a glance. A similarity score from an
-    opaque model would make that review impossible, and the review is the whole
-    safety model.
+    Every Fireship video is tagged `webdev`, `app development`, `tutorial`.
+    Those words match almost any playlist title and would make every
+    suggestion look plausible while being meaningless. Which words are generic
+    is channel-specific — `blender` is generic on a Blender channel and highly
+    distinctive on a cooking channel — so it is measured, not hardcoded.
+    """
+    if not catalog.videos:
+        return set()
+    document_frequency: Counter[str] = Counter()
+    for video in catalog.videos:
+        document_frequency.update(
+            set(_keywords(video.title)) | set(_keywords(" ".join(video.tags))))
+    cutoff = max(2, int(0.25 * len(catalog.videos)))
+    return {word for word, count in document_frequency.items()
+            if count >= cutoff}
+
+
+def _suggest_playlist(video, catalog: Catalog,
+                      generic: set[str] | None = None) -> tuple[str, str] | None:
+    """Pick the existing playlist this video clearly belongs in, or nothing.
+
+    Deliberately dumb and explainable — token matching, not embeddings. A
+    creator reviewing 60 proposed playlist additions in `plan` needs to see
+    *why* each was suggested at a glance. An opaque similarity score would make
+    that review impossible, and the review is the whole safety model.
+
+    The rule is **full coverage of the playlist's distinctive words**. An
+    earlier version accepted half coverage, which let the single generic word
+    "development" put a video titled "The safest way to store Bitcoin was just
+    hacked" into a playlist called "Backend Development". Since playlist adds
+    are auto-fixable, that would have really moved it.
+
+    Suggesting nothing is a perfectly good answer. The finding still reports
+    the video as orphaned; it just doesn't pretend to know where it goes.
     """
     if not catalog.playlists:
         return None
+
+    generic = generic if generic is not None else _generic_words(catalog)
     video_words = set(_keywords(video.title)) | set(_keywords(
         " ".join(video.tags)))
     if not video_words:
         return None
 
-    best: tuple[float, str, str] | None = None
+    best: tuple[int, str, str] | None = None
     for playlist in catalog.playlists:
         pl_words = set(_keywords(playlist.title))
-        if not pl_words:
+        distinctive = pl_words - generic - _PLAYLIST_QUALIFIERS
+        if not distinctive:
+            # A playlist named only with generic words ("Tutorials", "Videos")
+            # can never be matched confidently — it would become a dumping
+            # ground for the whole catalog.
             continue
-        overlap = len(video_words & pl_words) / len(pl_words)
-        if overlap > 0 and (best is None or overlap > best[0]):
-            best = (overlap, playlist.id, playlist.title)
+        if not distinctive <= video_words:
+            continue
+        # Prefer the most specific playlist that fully matches.
+        if best is None or len(distinctive) > best[0]:
+            best = (len(distinctive), playlist.id, playlist.title)
 
-    # Require a real match. Half the playlist's title words must appear, so
-    # "Tutorials" does not become a dumping ground for everything.
-    if best and best[0] >= 0.5:
-        return best[1], best[2]
-    return None
+    return (best[1], best[2]) if best else None
 
 
 def _cluster_by_keyword(catalog: Catalog) -> dict[str, list]:

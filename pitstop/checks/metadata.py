@@ -139,9 +139,11 @@ class LongTitleCheck(BaseCheck):
 @register
 class MissingCaptionsCheck(BaseCheck):
     id = "metadata.captions"
-    name = "No captions"
-    description = ("Captions are indexed by YouTube search and are the entire "
-                   "experience for deaf viewers and the ~80% who watch muted.")
+    name = "No uploaded caption track"
+    description = ("`contentDetails.caption` reports only *uploaded* caption "
+                   "tracks. YouTube's auto-generated captions do not set it, "
+                   "so this flags videos relying on ASR alone — which is worse "
+                   "for search indexing and for accuracy on technical terms.")
 
     def run(self, catalog: Catalog, ctx: CheckContext) -> Iterable[Finding]:
         for video in catalog.videos:
@@ -151,12 +153,17 @@ class MissingCaptionsCheck(BaseCheck):
                 continue
             yield Finding(
                 check_id=self.id,
-                severity=Severity.WARNING,
-                title="No captions",
-                detail="no caption track available on this video",
+                # Deliberately NOTICE, not WARNING. Most videos rely on
+                # auto-captions and are not "broken"; claiming a channel like
+                # Fireship has "no captions" is the kind of overstatement that
+                # makes a creator discount the whole report.
+                severity=Severity.NOTICE,
+                title="No uploaded caption track",
+                detail=("relying on auto-generated captions only "
+                        "(no uploaded track)"),
                 video_id=video.id,
                 impact_views=int(video.views_per_day * 30),
-                evidence={},
+                evidence={"auto_captions_may_exist": True},
             )
 
 

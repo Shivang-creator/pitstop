@@ -106,8 +106,15 @@ def _header(catalog: Catalog, client: YouTubeClient) -> None:
     mode = {"PUBLIC": "public scan · read-only",
             "OWNER": "authenticated as owner",
             "FIXTURE": "fixture replay · offline"}[client.mode]
-    subtitle = (f"{ch.video_count:,} videos · {ch.subscriber_count:,} subscribers"
-                f" · {ch.view_count:,} views")
+    # Report what we actually scanned, not channel.statistics.videoCount —
+    # that stat counts only public videos and lags behind reality, so a channel
+    # with 4 uploads can report 1. Showing the API's number next to findings
+    # from four videos reads as a bug in the tool.
+    scanned = len(catalog.videos)
+    subtitle = (f"{scanned:,} videos scanned · {ch.subscriber_count:,} "
+                f"subscribers · {ch.view_count:,} views")
+    if ch.video_count and ch.video_count != scanned:
+        subtitle += f"  [channel reports {ch.video_count:,}]"
     console.print()
     console.print(Panel(
         Group(Text(ch.title, style="bold white"),
