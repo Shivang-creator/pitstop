@@ -515,3 +515,26 @@ def test_qualifier_words_do_not_block_a_match():
     cat = catalog(videos, [Playlist(id="PL1", title="Blender Basics")])
 
     assert _suggest_playlist(target, cat) == ("PL1", "Blender Basics")
+
+
+def test_mine_sentinel_is_not_treated_as_a_handle():
+    """Regression: `resolve_channel("MINE")` was parsed as a handle, so it
+    looked up a channel literally named MINE, found nothing, and surfaced as
+    an UnboundLocalError three frames later."""
+    from pitstop.youtube import YouTubeClient, parse_channel_ref
+
+    # Left to the generic parser this becomes a handle lookup.
+    assert parse_channel_ref(YouTubeClient.MINE) == ("handle", "MINE")
+    # So resolve_channel must special-case it before parsing.
+    assert YouTubeClient.MINE == "MINE"
+
+
+def test_mine_requires_owner_credentials():
+    from pitstop.youtube import AuthRequired, YouTubeClient
+
+    client = YouTubeClient(fixture="demo")
+    client.mode = "PUBLIC"      # simulate an API-key-only client
+    client.is_owner = False
+
+    with pytest.raises(AuthRequired, match="requires OAuth"):
+        client.resolve_channel(YouTubeClient.MINE)

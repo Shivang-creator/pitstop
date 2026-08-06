@@ -1,0 +1,25 @@
+# Pitstop rules for @shivangshirodkar4518
+#
+# `description_footer` is appended to any description that doesn't already
+# contain its first line. Everything here is previewed in `pitstop plan`
+# before anything is written.
+
+description_footer: |
+  ── ── ──
+  Subscribe: https://www.youtube.com/@shivangshirodkar4518?sub_confirmation=1
+
+rules:
+  - id: hackathon-tagged
+    name: Hackathon demo videos carry the "hackathon" tag
+    when:
+      description_matches: "(?i)hackathon"
+    require:
+      has_tag: hackathon
+    severity: warning
+    fix: add_tag
+
+  - id: everything-in-a-playlist
+    name: Every video belongs to at least one playlist
+    require:
+      in_any_playlist: true
+    severity: warning

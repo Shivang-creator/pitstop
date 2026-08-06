@@ -37,6 +37,10 @@ URLS = {
         "https://console.cloud.google.com/apis/library/"
         "youtubeanalytics.googleapis.com"),
     "consent": "https://console.cloud.google.com/apis/credentials/consent",
+    # The newer Google Auth Platform path. Test users live here now; the older
+    # /apis/credentials/consent page redirects to it on migrated accounts, but
+    # linking directly saves a hop and lands on the right tab.
+    "audience": "https://console.cloud.google.com/auth/audience",
     "credentials": "https://console.cloud.google.com/apis/credentials",
 }
 
@@ -167,14 +171,22 @@ def run() -> int:
                "starts a review that takes weeks, and you don't need it.")
 
     # --- 3. Test user -------------------------------------------------------
-    _step(3, total, "Allow yourself in",
-          URLS["consent"],
-          [f"Find [bold]Test users[/] — it's either a section on this page or "
-           f"a tab called [bold]Audience[/] in the left menu.",
+    # By far the most common failure. Google's error ("Access blocked: … has
+    # not completed the Google verification process") reads like the app needs
+    # review, so people go publish it — which starts a weeks-long process they
+    # do not need. All that is actually missing is one email on a list.
+    _step(3, total, "Add yourself as a tester  [red](do not skip)[/]",
+          URLS["audience"],
+          ["Find [bold]Test users[/] on this page "
+           "([dim]left menu → [/][bold]Audience[/][dim] if you don't see "
+           "it[/]).",
            "Click [bold]+ ADD USERS[/].",
-           f"Type [bold]{email}[/] and click [bold]SAVE[/]."],
-          note="Skipping this is what causes 'access_denied' later. Without "
-               "it Google refuses your own login.")
+           f"Type [bold]{email}[/] → [bold]SAVE[/].",
+           "Confirm the address now appears in the list."],
+          note="If you skip this, sign-in fails with \"Access blocked: Pitstop "
+               "has not completed the Google verification process\". That "
+               "message is misleading — the app does NOT need verification. "
+               "It just needs your email on this list.")
 
     # --- 4. Create the client ----------------------------------------------
     started = time.time()

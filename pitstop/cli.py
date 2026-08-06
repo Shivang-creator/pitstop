@@ -467,18 +467,72 @@ def auth():
 
     console.print("\n  Opening your browser for Google sign-in…")
     client = YouTubeClient(owner=True)
+
     try:
-        channel, _ = client.resolve_channel("MINE")
-    except Exception:
-        # resolve_channel needs a ref; for the owner we use mine=True upstream.
-        # Falling back to a direct call keeps `auth` a pure credential check.
-        creds_ok = CONFIG.token_file.exists()
-        if creds_ok:
-            console.print(f"  [bold green]✓[/] Authenticated. Token cached at "
-                          f"[dim]{CONFIG.token_file}[/]\n")
-            raise typer.Exit(0)
-        raise
-    console.print(f"  [bold green]✓[/] Authenticated as [bold]{channel.title}[/]\n")
+        channel, _ = client.resolve_channel(YouTubeClient.MINE)
+    except Exception as exc:
+        message = str(exc)
+        console.print()
+
+        if "access_denied" in message or "verification process" in message:
+            # Google's wording sends people off to publish the app, which
+            # starts a weeks-long review they do not need.
+            console.print(
+                "[bold red]✗[/] Google blocked the sign-in: "
+                "[italic]\"has not completed the Google verification "
+                "process\"[/].\n\n"
+                "  [bold]That message is misleading.[/] The app does not need "
+                "verification —\n"
+                "  your Google account simply isn't on the project's test-user "
+                "list.\n\n"
+                "  [bold]Audience[/] → [bold]Test users[/] → "
+                "[bold]+ ADD USERS[/] → add the account you signed in with\n"
+                "  [cyan]https://console.cloud.google.com/auth/audience[/]\n")
+        elif "mismatching_state" in message or "CSRF Warning" in message:
+            # Each run generates a fresh anti-CSRF `state` and listens on a new
+            # random port. Completing a sign-in tab left over from an earlier
+            # run sends the *old* state to the *new* server, which correctly
+            # rejects it. Nothing is misconfigured; there are just stale tabs.
+            console.print(
+                "[bold red]✗[/] The sign-in came back with a stale security "
+                "token.\n\n"
+                "  [bold]Nothing is misconfigured.[/] You have leftover "
+                "Google sign-in tabs\n"
+                "  from an earlier attempt, and one of those was completed "
+                "instead of\n"
+                "  the new one. Each run uses a fresh token, so the old tab's "
+                "reply\n"
+                "  is rejected.\n\n"
+                "  [bold]Fix:[/]\n"
+                "  1. Close [bold]every[/] accounts.google.com tab and any "
+                "localhost tabs\n"
+                "  2. Run [cyan]pitstop auth[/] again\n"
+                "  3. Complete only the [bold]newly opened[/] tab\n")
+        elif "accessNotConfigured" in message or "has not been used in project" in message:
+            console.print(
+                "[bold red]✗[/] The YouTube APIs aren't enabled in the project "
+                "this OAuth client belongs to.\n\n"
+                "  Enable both, then re-run:\n"
+                "  [cyan]https://console.cloud.google.com/apis/library/"
+                "youtube.googleapis.com[/]\n"
+                "  [cyan]https://console.cloud.google.com/apis/library/"
+                "youtubeanalytics.googleapis.com[/]\n")
+        else:
+            # Never swallow an error we don't recognise — print it verbatim so
+            # it can actually be diagnosed.
+            console.print(f"[bold red]✗[/] Sign-in failed.\n\n"
+                          f"  [dim]{message}[/]\n")
+
+        if CONFIG.token_file.exists():
+            console.print("  [yellow]Note:[/] a token was still written, so "
+                          "the login itself may have worked.\n"
+                          "  Try [cyan]pitstop doctor[/].\n")
+        raise typer.Exit(1)
+
+    console.print(f"\n  [bold green]✓[/] Signed in as "
+                  f"[bold]{channel.title}[/]")
+    console.print(f"  [dim]{channel.video_count} videos · token cached at "
+                  f"{CONFIG.token_file}[/]\n")
 
 
 @app.command()

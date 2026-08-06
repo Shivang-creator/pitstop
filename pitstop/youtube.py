@@ -163,7 +163,23 @@ class YouTubeClient:
                 )
             flow = InstalledAppFlow.from_client_secrets_file(
                 str(CONFIG.client_secret_file), SCOPES)
-            creds = flow.run_local_server(port=0, prompt="consent")
+            creds = flow.run_local_server(
+                port=0,
+                prompt="consent",
+                # Shown in the terminal above the URL, and in the browser tab
+                # after success — both places a confused user actually looks.
+                authorization_prompt_message=(
+                    "\n  Complete sign-in in the browser tab that just "
+                    "opened.\n"
+                    "  If an older Google sign-in tab is still open, close it "
+                    "first —\n"
+                    "  finishing that one instead will fail with a stale-token "
+                    "error.\n\n"
+                    "  If no tab opened, visit:\n  {url}\n"),
+                success_message=(
+                    "Pitstop is signed in. You can close this tab and return "
+                    "to the terminal."),
+            )
         CONFIG.token_file.write_text(creds.to_json(), encoding="utf-8")
         return creds
 
@@ -194,8 +210,16 @@ class YouTubeClient:
 
     # -- reads ---------------------------------------------------------------
 
+    # Sentinel meaning "whichever channel the OAuth token belongs to".
+    MINE = "MINE"
+
     def resolve_channel(self, ref: str) -> tuple[Channel, str]:
         """Resolve any channel reference to (Channel, uploads_playlist_id).
+
+        Pass `YouTubeClient.MINE` for the authenticated user's own channel —
+        that maps to `channels.list(mine=True)`, which is the only way to ask
+        "who am I". Treating "MINE" as a handle (as an earlier version did)
+        looks up a channel literally named MINE and fails confusingly.
 
         Note we never touch search.list here. It costs 100 units *and* is capped
         at 100 calls/day regardless of the unit pool — one careless search-based
@@ -208,10 +232,28 @@ class YouTubeClient:
             return self._parse_channel(raw), raw["contentDetails"][
                 "relatedPlaylists"]["uploads"]
 
-        kind, value = parse_channel_ref(ref)
         params: dict[str, Any] = {
             "part": "snippet,statistics,contentDetails",
         }
+
+        if ref == self.MINE:
+            if not self.is_owner:
+                raise AuthRequired(
+                    "Resolving your own channel requires OAuth. "
+                    "Run `pitstop auth`.")
+            params["mine"] = True
+            self._charge("channels.list")
+            resp = self.data.channels().list(**params).execute()
+            items = resp.get("items", [])
+            if not items:
+                raise YouTubeError(
+                    "Signed in, but this Google account has no YouTube "
+                    "channel. Sign in with the account that owns the channel.")
+            raw = items[0]
+            return (self._parse_channel(raw),
+                    raw["contentDetails"]["relatedPlaylists"]["uploads"])
+
+        kind, value = parse_channel_ref(ref)
         if kind == "id":
             params["id"] = value
         else:
