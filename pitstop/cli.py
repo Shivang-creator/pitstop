@@ -81,7 +81,12 @@ def _scan(channel: str, *, fixture: Optional[str], owner: bool,
 
         try:
             catalog = fetch_catalog(client, channel, limit=limit,
-                                    with_captions=owner and limit is not None,
+                                    # Caption availability already arrives free
+                                    # with videos.list; the captions.list
+                                    # endpoint costs 50 units *per video* for
+                                    # the same boolean. Never spend that by
+                                    # default.
+                                    with_captions=False,
                                     with_analytics=owner, progress=on_fetch)
         except YouTubeError as exc:
             progress.stop()
@@ -437,6 +442,295 @@ def apply(
     if not dry_run:
         console.print(f"\n  [dim]Verify: [/][cyan]https://www.youtube.com/"
                       f"{'@' + catalog.channel.handle if catalog.channel.handle else 'channel/' + catalog.channel.id}/videos[/]\n")
+
+
+@app.command()
+def trending(
+    category: Optional[str] = typer.Option(
+        None, "--category", "-c",
+        help="tech, education, gaming, howto, music… or a numeric id"),
+    region: str = typer.Option("US", "--region", "-r",
+                               help="Two-letter region code, e.g. IN, US, GB"),
+    compare_to: Optional[str] = typer.Option(
+        None, "--compare", help="Your channel — see how your habits differ"),
+    limit: int = typer.Option(50, "--limit", "-n", max=50),
+    include_shorts: bool = typer.Option(
+        False, "--include-shorts",
+        help="Keep Shorts in the reference set (excluded by default)"),
+    fixture: Optional[str] = typer.Option(None, "--fixture"),
+):
+    """What's working right now in your niche, and what those videos do.
+
+    Costs one quota unit. Works with no channel of your own.
+    """
+    from . import benchmark as bench
+
+    client = _build_client(fixture, False, CONFIG.quota_budget)
+
+    if category and bench.resolve_category(category) is None:
+        console.print(f"\n[yellow]![/] Unknown category [bold]{category}[/].")
+        console.print("  [dim]Try: " + ", ".join(
+            sorted(set(bench.CATEGORY_ALIASES))[:14]) + "…[/]")
+        console.print("  [dim]Or a numeric id: " + ", ".join(
+            f"{k}={v}" for k, v in list(bench.CATEGORIES.items())[:5]) + "…[/]\n")
+        raise typer.Exit(1)
+
+    with console.status("[dim]Fetching trending videos…[/]"):
+        try:
+            videos, source = bench.fetch_trending(
+                client, region=region, category=category, limit=limit)
+        except YouTubeError as exc:
+            console.print(f"\n[bold red]✗[/] {exc}\n")
+            raise typer.Exit(1)
+
+    if not videos:
+        console.print("\n[yellow]![/] No trending videos returned for that "
+                      "combination.\n")
+        raise typer.Exit(1)
+
+    your_catalog = None
+    if compare_to:
+        with console.status(f"[dim]Fetching {compare_to}…[/]"):
+            your_catalog = fetch_catalog(client, compare_to, limit=100)
+
+    report = bench.compare(
+        videos, your_catalog.videos if your_catalog else None,
+        source=source, include_shorts=include_shorts,
+        your_channel=your_catalog.channel.title if your_catalog else None)
+
+    _render_benchmark(report, client)
+
+    gaps = bench.gap_topics(videos, your_catalog)
+    if gaps:
+        console.print(Rule("[dim]Topics trending that you haven't covered[/]",
+                           style="bright_black"))
+        console.print()
+        console.print("  " + "   ".join(
+            f"[cyan]{word}[/][dim]×{count}[/]" for word, count in gaps[:10]))
+        console.print("\n  [dim]Words appearing in trending titles right now "
+                      "and nowhere in your catalog.[/]")
+        console.print("  [dim]Verifiable both ways — not generated "
+                      "suggestions.[/]\n")
+
+
+@app.command()
+def benchmark(
+    channel: str = typer.Argument(..., help="Your channel"),
+    against: str = typer.Option(..., "--against", "-a",
+                                help="Comma-separated channels to compare with"),
+    limit: int = typer.Option(30, "--limit", "-n",
+                              help="Videos to sample per channel"),
+    fixture: Optional[str] = typer.Option(None, "--fixture"),
+):
+    """Compare your habits against specific channels you admire."""
+    from . import benchmark as bench
+
+    client = _build_client(fixture, False, CONFIG.quota_budget)
+    refs = [r.strip() for r in against.split(",") if r.strip()]
+
+    with console.status("[dim]Fetching your channel…[/]"):
+        yours = fetch_catalog(client, channel, limit=100)
+
+    reference: list = []
+    names: list[str] = []
+    for ref in refs:
+        with console.status(f"[dim]Fetching {ref}…[/]"):
+            try:
+                other = fetch_catalog(client, ref, limit=limit)
+            except YouTubeError as exc:
+                console.print(f"[yellow]![/] Skipping {ref}: {exc}")
+                continue
+        reference.extend(other.videos)
+        names.append(other.channel.title)
+
+    if not reference:
+        console.print("\n[bold red]✗[/] None of those channels resolved.\n")
+        raise typer.Exit(1)
+
+    report = bench.compare(reference, yours.videos,
+                           source="vs " + ", ".join(names),
+                           your_channel=yours.channel.title)
+    _render_benchmark(report, client)
+
+
+@app.command()
+def draft(
+    title: str = typer.Option(..., "--title", "-t"),
+    description_file: Optional[Path] = typer.Option(
+        None, "--description", "-d", help="Path to a file with the description"),
+    tags: Optional[str] = typer.Option(None, "--tags",
+                                       help="Comma-separated"),
+    duration: int = typer.Option(600, "--duration",
+                                 help="Video length in seconds"),
+    rules_file: Optional[Path] = typer.Option(None, "--rules"),
+):
+    """Check a video BEFORE you upload it. No channel or login needed.
+
+    Runs the same checks against metadata you haven't published yet, so the
+    problems get fixed while fixing them is free.
+    """
+    from datetime import datetime, timezone
+
+    from .models import Catalog, Channel, Video
+
+    description = ""
+    if description_file:
+        if not description_file.exists():
+            console.print(f"\n[bold red]✗[/] No such file: "
+                          f"{description_file}\n")
+            raise typer.Exit(1)
+        description = description_file.read_text(encoding="utf-8")
+
+    video = Video(
+        id="draft",
+        title=title,
+        description=description,
+        published_at=datetime.now(timezone.utc),
+        tags=[t.strip() for t in (tags or "").split(",") if t.strip()],
+        duration_seconds=duration,
+        view_count=0,
+    )
+    catalog = Catalog(
+        channel=Channel(id="draft", title="Unpublished draft"),
+        videos=[video], playlists=[], is_owner=True,
+    )
+
+    ctx = CheckContext(has_network=True, has_llm=CONFIG.has_llm,
+                       rules=load_rules(rules_file))
+    findings, skipped = run_all(catalog, ctx)
+
+    # Checks that only make sense once a video is published and sitting in a
+    # catalog. A draft cannot be "in no playlist" — it isn't anywhere yet.
+    irrelevant = {"playlist.orphan", "playlist.missing_series",
+                  "playlist.broken_items", "metadata.stale_winner"}
+    # Custom rules can reference playlist membership too, and those are just as
+    # meaningless here. Filter on what the rule actually asks for rather than
+    # on its id, so a user's own rule names don't have to follow a convention.
+    playlist_predicates = {"in_any_playlist", "in_playlist"}
+    findings = [
+        f for f in findings
+        if f.check_id not in irrelevant
+        and not (playlist_predicates & set((f.evidence.get("require") or {})))
+    ]
+
+    console.print()
+    console.print(Panel(Group(
+        Text(title or "(no title)", style="bold white"),
+        Text(f"{len(description)} chars · {len(video.tags)} tags · "
+             f"{duration // 60}m{duration % 60:02d}s", style="dim"),
+        Text("unpublished draft", style="dim italic")),
+        title="[bold]PITSTOP · pre-publish[/]",
+        border_style="bright_black", padding=(0, 2)))
+
+    if not findings:
+        console.print("\n  [bold green]✓ Nothing to fix.[/] "
+                      "[dim]Ship it.[/]\n")
+        raise typer.Exit(0)
+
+    console.print()
+    for finding in scoring.rank(findings, catalog):
+        style, icon = SEVERITY_STYLE[finding.severity]
+        console.print(f"  {icon} [{style}]{finding.title}[/]")
+        console.print(f"      [dim]{finding.detail}[/]")
+        if finding.fix and finding.fix.field == "tags":
+            console.print(f"      [green]suggested tags:[/] "
+                          f"[dim]{', '.join(finding.fix.proposed)}[/]")
+    console.print()
+
+    criticals = sum(1 for f in findings if f.severity is Severity.CRITICAL)
+    console.print(f"  [bold]{len(findings)} to fix[/] before you publish"
+                  + (f"  ·  [red]{criticals} critical[/]" if criticals else ""))
+    console.print("\n  [dim]Fixing these now costs nothing. Fixing them after "
+                  "publishing costs a re-upload or lost momentum.[/]\n")
+    _skipped_block(skipped)
+
+
+def _render_benchmark(report, client: YouTubeClient) -> None:
+    from .config import CONFIG as _C  # noqa: F401  (keeps import local)
+
+    console.print()
+    subtitle = f"{report.sample_size} long-form videos analysed"
+    if report.shorts_excluded:
+        subtitle += f"  ·  {report.shorts_excluded} Shorts excluded"
+    if report.your_channel:
+        subtitle += f"  ·  vs {report.your_channel}"
+
+    console.print(Panel(Group(
+        Text(report.source, style="bold white"),
+        Text(subtitle, style="dim")),
+        title="[bold]PITSTOP · benchmark[/]",
+        border_style="bright_black", padding=(0, 2)))
+
+    if report.caveat:
+        console.print(f"\n  [yellow]![/] [dim]{report.caveat}[/]")
+    elif report.shorts_excluded:
+        console.print(f"\n  [dim]Shorts are excluded — their conventions "
+                      f"(no chapters, short descriptions) would drag the "
+                      f"reference numbers\n  down and make long-form habits "
+                      f"look unnecessary. Use --include-shorts to keep "
+                      f"them.[/]")
+
+    console.print()
+    table = Table(box=None, padding=(0, 2), header_style="dim")
+    table.add_column("What they do")
+    table.add_column("Reference", justify="right")
+    table.add_column("You", justify="right")
+    table.add_column("", width=12)
+
+    for practice in report.practices:
+        if practice.yours is None:
+            yours_cell = "[dim]—[/]"
+            verdict_cell = ""
+        else:
+            colour = {"ok": "green", "behind": "yellow",
+                      "far behind": "red"}[practice.verdict]
+            yours_cell = f"[{colour}]{practice.yours:g}[/]"
+            verdict_cell = ("" if practice.verdict == "ok"
+                            else f"[{colour}]{practice.verdict}[/]")
+        table.add_row(practice.label,
+                      f"{practice.reference:g} [dim]{practice.unit}[/]",
+                      yours_cell, verdict_cell)
+    console.print(table)
+
+    if report.behind:
+        console.print()
+        console.print(Rule("[dim]Biggest gaps[/]", style="bright_black"))
+        console.print()
+        for practice in report.behind[:4]:
+            console.print(f"  [yellow]•[/] [bold]{practice.label}[/]")
+            console.print(f"      they: {practice.reference:g} "
+                          f"{practice.unit}   ·   you: {practice.yours:g} "
+                          f"{practice.unit}")
+        console.print()
+
+    if report.topics:
+        console.print(Rule("[dim]What they're talking about[/]",
+                           style="bright_black"))
+        console.print()
+        console.print("  " + "   ".join(
+            f"[cyan]{word}[/][dim]×{n}[/]" for word, n in report.topics[:12]))
+        console.print()
+
+    if report.examples:
+        console.print(Rule("[dim]Sample[/]", style="bright_black"))
+        console.print()
+        sample = Table(box=None, padding=(0, 2), header_style="dim")
+        sample.add_column("Video")
+        sample.add_column("Views", justify="right")
+        sample.add_column("Chapters", justify="center")
+        sample.add_column("Desc", justify="right")
+        for example in report.examples[:5]:
+            title = example["title"]
+            sample.add_row(
+                title[:54] + "…" if len(title) > 54 else title,
+                f"{example['views']:,}",
+                "[green]✓[/]" if example["has_chapters"] else "[dim]—[/]",
+                f"{example['description_chars']:,}")
+        console.print(sample)
+        console.print()
+
+    _quota_line(client)
+    console.print()
 
 
 @app.command(name="connect")

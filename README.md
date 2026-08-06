@@ -54,15 +54,49 @@ The nearest things that exist each cover one slice:
 Nothing audits the whole catalog, scores it, ranks fixes by traffic-weighted
 impact, and then applies them behind a reviewable diff.
 
+**What Pitstop deliberately is not:** an idea generator. "Give me video ideas"
+is the most crowded feature in this category and the output is unfalsifiable.
+The closest Pitstop gets is `gap_topics` — words that demonstrably appear in
+trending titles right now and demonstrably appear nowhere in your catalog. It's
+a set difference over real data, and you can verify both halves yourself.
+
 ---
 
-## The three commands
+## Two creators, one engine
+
+**If you have a catalog**, Pitstop audits and repairs it:
 
 ```bash
 pitstop scan  <channel>   # read-only audit of ANY channel. no login.
 pitstop plan  <channel>   # exactly what would change, as a diff. changes nothing.
 pitstop apply <channel>   # actually change it. requires ownership.
 ```
+
+**If you don't have one yet**, the same 19 checks point outward instead:
+
+```bash
+pitstop trending --category tech --region IN   # what's working right now, measured
+pitstop benchmark @you --against @them,@other  # your habits vs channels you admire
+pitstop draft --title "..." --description d.txt  # check a video before you upload it
+```
+
+That second group exists because a new creator's problem isn't "what should I
+make" — it's **"I don't know what good looks like."** Pitstop already encodes
+what good looks like. So rather than asking a language model to opine about
+best practices, it runs the same checks against videos that are demonstrably
+working right now and reports what they do:
+
+```
+  What they do                             Reference     You
+  Videos with working chapters                  25 %       0    far behind
+  Description length                       629 chars    1398
+  Tags per video                           11.5 tags       0    far behind
+  Links in description                     3.5 links       2    behind
+```
+
+Every number is measured from real trending videos. `trending` costs **one
+quota unit** — `videos.list(chart="mostPopular")` is the cheapest useful
+endpoint YouTube exposes.
 
 `scan` works on any public channel with nothing but an API key, which is what
 makes "paste a URL, get a score in 40 seconds" possible with zero setup. `plan`
@@ -78,7 +112,7 @@ pitstop serve      # → http://127.0.0.1:8000
 
 ## What it checks
 
-19 checks, each an independent plugin. Adding one is a single file plus a
+19 checks, each an independent plugin. The same set runs against your catalog, against trending videos, and against an unpublished draft. Adding one is a single file plus a
 decorator; nothing else in the codebase changes.
 
 **💸 Money leaks**
@@ -227,6 +261,14 @@ own network hiccuped would be worse than useless.
 replacement URL, so the proposed fix marks the link for the creator to edit
 during `plan` review.
 
+**LLM suggestions are grounded, not invented.** Tag suggestions derive from the
+creator's own title and description; the model categorises and rephrases, it
+does not add claims. Everything goes through `plan` as a reviewable diff, is
+length- and count-capped, and degrades to *no suggestion* on any error rather
+than to a bad one. Chapter generation requires a real timestamped transcript —
+chapters are claims about *when* things happen, and there is no honest way to
+guess that from a title, so Pitstop refuses to try.
+
 **What genuinely is auto-fixable:** title, description, tags, category, privacy,
 scheduled publish time, thumbnail, playlist membership, captions.
 
@@ -254,7 +296,7 @@ That choice is why "scan any channel, free, no login" is viable at all.
 ## Development
 
 ```bash
-.venv/bin/python -m pytest        # 58 tests
+.venv/bin/python -m pytest        # 204 tests
 .venv/bin/pitstop checks          # list every check and what it needs
 cd web && npm run dev             # UI on :5173, proxies /api to :8000
 ```

@@ -243,3 +243,77 @@ export const fmt = {
         ? `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}K`
         : `${n}`,
 };
+
+/* ── new-creator surfaces ─────────────────────────────────────────────── */
+
+export interface Practice {
+  key: string;
+  label: string;
+  unit: string;
+  reference: number;
+  yours: number | null;
+  verdict: "reference" | "ok" | "behind" | "far behind";
+}
+
+export interface TrendingExample {
+  title: string;
+  video_id: string;
+  url: string;
+  views: number;
+  has_chapters: boolean;
+  description_chars: number;
+  thumbnail_url: string;
+}
+
+export interface TrendingResult {
+  source: string;
+  sample_size: number;
+  shorts_excluded: number;
+  caveat: string;
+  your_channel: string | null;
+  practices: Practice[];
+  examples: TrendingExample[];
+  topics: [string, number][];
+  gaps: [string, number][];
+  categories: Record<string, string>;
+}
+
+export interface DraftResult {
+  findings: FindingInstance[];
+  suggested_tags: string[];
+  skipped: { check_id: string; name: string; reason: string }[];
+  critical: number;
+}
+
+export async function fetchTrending(req: {
+  category?: string | null;
+  region?: string;
+  compare_to?: string | null;
+  include_shorts?: boolean;
+}): Promise<TrendingResult> {
+  const response = await fetch(`${BASE}/api/trending`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ region: "US", ...req }),
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({ detail: "" }));
+    throw new Error(body.detail || "Could not fetch trending data");
+  }
+  return response.json();
+}
+
+export async function checkDraft(req: {
+  title: string;
+  description: string;
+  tags: string[];
+  duration_seconds: number;
+}): Promise<DraftResult> {
+  const response = await fetch(`${BASE}/api/draft`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(req),
+  });
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}

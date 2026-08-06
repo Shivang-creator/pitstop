@@ -145,10 +145,12 @@ class MissingFooterCheck(BaseCheck):
         if not footer:
             return  # nothing configured — not a finding, just not applicable
 
-        marker = (ctx.rules or {}).get("footer_marker") or footer.strip().splitlines()[0]
+        marker = (ctx.rules or {}).get("footer_marker") or _footer_marker(footer)
+        if not marker:
+            return
 
         for video in catalog.videos:
-            if marker.strip() and marker.strip() in video.description:
+            if marker in video.description:
                 continue
             proposed = video.description.rstrip() + "\n\n" + footer.strip() + "\n"
             yield Finding(
@@ -165,6 +167,38 @@ class MissingFooterCheck(BaseCheck):
 
 
 # --- helpers ---------------------------------------------------------------
+
+
+def _footer_marker(footer: str) -> str:
+    """Pick the line that reliably proves the footer is present.
+
+    Naively taking the first line breaks on the most common footer shape there
+    is, because that line is usually a decorative rule:
+
+        ── ── ──
+        Subscribe: https://youtube.com/@me
+
+    "── ── ──" is not distinctive — any description using a separator would
+    look like it already has the footer, and the check would silently pass on
+    every video it should have flagged.
+
+    So: prefer the first line containing a URL (a link is as distinctive as
+    text gets), then the longest line with real word characters, and only fall
+    back to the first line if the footer is nothing but punctuation.
+    """
+    lines = [line.strip() for line in footer.strip().splitlines() if line.strip()]
+    if not lines:
+        return ""
+
+    for line in lines:
+        if "http://" in line or "https://" in line:
+            return line
+
+    wordy = [line for line in lines if re.search(r"\w{3,}", line)]
+    if wordy:
+        return max(wordy, key=len)
+
+    return lines[0]
 
 
 def _gaps_ok(matches: list[tuple[str, str]]) -> bool:

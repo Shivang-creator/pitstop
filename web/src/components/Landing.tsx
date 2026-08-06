@@ -10,10 +10,14 @@ const EXAMPLES = [
 
 export function Landing({
   onScan,
+  onDiscover,
+  onDraft,
   capabilities,
   error,
 }: {
   onScan: (channel: string, fixture: string | null, limit: number | null) => void;
+  onDiscover: () => void;
+  onDraft: () => void;
   capabilities: Capabilities | null;
   error: string | null;
 }) {
@@ -114,9 +118,48 @@ export function Landing({
         )}
       </div>
 
+      {/* Haven't published anything yet? The audit above needs a catalog.
+          These two don't. */}
       <div
-        className="rise mt-14 grid w-full grid-cols-2 gap-x-8 gap-y-5 border-t border-white/[0.05] pt-8 sm:grid-cols-4"
-        style={{ animationDelay: "160ms" }}
+        className="rise mt-12 w-full border-t border-white/[0.05] pt-8"
+        style={{ animationDelay: "140ms" }}
+      >
+        <p className="text-center text-[11.5px] text-[color:var(--color-ink-600)]">
+          No catalog yet? Start here instead.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <button
+            onClick={onDiscover}
+            disabled={!canScanLive}
+            className="group rounded-xl border border-white/[0.07] bg-white/[0.015] p-4 text-left transition-colors hover:border-white/[0.14] hover:bg-white/[0.04] disabled:opacity-40"
+          >
+            <div className="text-[13px] font-medium text-white">
+              What's working in my niche →
+            </div>
+            <div className="mt-1 text-[11.5px] leading-snug text-[color:var(--color-ink-400)]">
+              Real trending videos, measured. What they do that you don't —
+              chapters, tags, description length. One quota unit.
+            </div>
+          </button>
+
+          <button
+            onClick={onDraft}
+            className="group rounded-xl border border-white/[0.07] bg-white/[0.015] p-4 text-left transition-colors hover:border-white/[0.14] hover:bg-white/[0.04]"
+          >
+            <div className="text-[13px] font-medium text-white">
+              Check a video before I publish →
+            </div>
+            <div className="mt-1 text-[11.5px] leading-snug text-[color:var(--color-ink-400)]">
+              Paste a draft title and description. Same checks, run before the
+              mistakes are permanent. No channel, no login.
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div
+        className="rise mt-10 grid w-full grid-cols-2 gap-x-8 gap-y-5 border-t border-white/[0.05] pt-8 sm:grid-cols-4"
+        style={{ animationDelay: "200ms" }}
       >
         {[
           ["Money leaks", "Dead links, broken affiliate URLs, undisclosed sponsorships"],

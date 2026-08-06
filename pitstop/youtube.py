@@ -313,6 +313,45 @@ class YouTubeClient:
             out.extend(self._parse_video(v) for v in resp.get("items", []))
         return out
 
+    def most_popular(self, *, region: str = "US",
+                     category_id: str | None = None,
+                     limit: int = 50) -> list[Video]:
+        """Trending videos. 1 quota unit for up to 50, with full snippets.
+
+        Worth contrasting with the obvious alternative: `search.list` with
+        `order=viewCount` costs 100 units per call *and* draws on a separate
+        100-calls/day allowance, then returns only ids — so you pay again to
+        hydrate them. This endpoint costs 1 and returns everything.
+        """
+        if self.mode == "FIXTURE":
+            self._charge("videos.list")
+            raws = (self._fixture_get("trending")
+                    or self._fixture_get("videos") or [])
+            return [self._parse_video(v) for v in raws[:limit]]
+
+        params: dict[str, Any] = {
+            "part": "snippet,statistics,contentDetails,status",
+            "chart": "mostPopular",
+            "regionCode": region.upper(),
+            "maxResults": min(50, limit),
+        }
+        if category_id:
+            params["videoCategoryId"] = category_id
+
+        self._charge("videos.list")
+        try:
+            resp = self.data.videos().list(**params).execute()
+        except Exception as exc:
+            # Not every category has a trending chart in every region, and
+            # YouTube answers that with a 400 rather than an empty list.
+            if "400" in str(exc) or "invalid" in str(exc).lower():
+                raise YouTubeError(
+                    f"YouTube has no trending chart for that category in "
+                    f"{region.upper()}. Try a different region, or omit the "
+                    f"category.") from exc
+            raise
+        return [self._parse_video(v) for v in resp.get("items", [])]
+
     def list_playlists(self, channel_id: str) -> list[Playlist]:
         if self.mode == "FIXTURE":
             self._charge("playlists.list")

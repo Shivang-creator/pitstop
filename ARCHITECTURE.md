@@ -235,3 +235,100 @@ tests/           58 tests
   apply it. CI/CD for a channel.
 - **Ad-suitability on actual content** — transcription plus keyframe vision,
   rather than title and description only. Scoped and honest about being unbuilt.
+
+---
+
+## Serving new creators without becoming an idea generator
+
+Pitstop originally only worked for people who already had a catalog. That is a
+real gap — but the obvious fix ("add AI video ideas") is the most crowded
+feature in this category, and its output is unfalsifiable.
+
+The reframing: a new creator's problem is not *what should I make*. It is
+**"I don't know what good looks like."** Pitstop already encodes what good
+looks like, in 19 checks. So the same checks point outward:
+
+| Command | Reference set | Costs |
+|---|---|---|
+| `trending` | Real trending videos in a category/region | **1 unit** |
+| `benchmark` | Specific channels you name | ~1 unit per 50 videos |
+| `draft` | Nothing — checks unpublished metadata | 0 units |
+
+`videos.list(chart="mostPopular")` returns 50 full snippets for one quota unit.
+The alternative — `search.list(order=viewCount)` — costs 100 units per call,
+draws on a *separate* 100-calls/day allowance, and returns only ids, so you pay
+again to hydrate them. That 100× difference is why "measure what's working" is
+a free feature rather than a premium one.
+
+### Shorts pollute every reference set
+
+YouTube's trending chart is majority Shorts in most regions. Left in, they
+dragged median video length to 151 seconds and made every long-form creator
+look "far behind" on chapters — a convention Shorts never use. Benchmarking a
+12-minute explainer against 30-second phone-sale clips produces confident,
+wrong advice.
+
+So `split_shorts` excludes sub-90-second videos from the reference set by
+default, excludes them from *your* side too (like-for-like), reports how many
+were dropped, and emits a caveat when the entire niche is Shorts rather than
+silently producing meaningless numbers. Unknown duration counts as long-form —
+missing data must not silently shrink the sample.
+
+Two practices — title length and video length — are reported but never scored.
+Telling someone their 6-minute video is "behind" a 22-minute one is advice, not
+measurement.
+
+### The one place suggestions are generated
+
+`enrich.py` is the only module that invents content, and it is the most
+dangerous code in the repo: a wrong dead-link report wastes a minute, while a
+hallucinated tag on 200 videos is the creator's channel now saying something
+they didn't say. Its rules:
+
+1. **Grounded** — suggestions derive from the creator's own title and
+   description. The model categorises and rephrases; it does not add claims.
+2. **Reviewable** — output goes through `plan` as a diff like any other fix.
+3. **Degrades to nothing** — no key, a timeout, malformed JSON: the check
+   reports the problem *without* a fix. A missing suggestion is fine; a bad one
+   is not.
+4. **Bounded** — tags are sanitised, de-duplicated, length-capped per tag and
+   capped against YouTube's ~500-character total (exceeding it fails the whole
+   `videos.update` with an error that looks unrelated to tags).
+
+Chapter generation requires a real timestamped transcript and refuses without
+one. Chapters are claims about *when* things happen; there is no honest way to
+infer that from a title. The generated list is then validated against YouTube's
+actual rules (first at 00:00, 3+ chapters, 10s minimum gaps, ascending, within
+duration) rather than trusted — a list violating them renders as *no* chapters,
+which would look like the fix silently did nothing.
+
+Only the highest-traffic 25 videos get suggestions. Spending 500 LLM calls on a
+500-video catalog is slow and pointless when the creator reviews the first
+twenty and stops.
+
+---
+
+## Bugs found by fuzzing, after the unit tests were green
+
+`tests/test_robustness.py` runs every check against 21 pathological catalogs
+(empty, single-video, all-private, zero-view, future-dated, emoji, RTL, CJK,
+5000-character descriptions, duplicate ids, playlists referencing missing
+videos). A check that throws is *caught by the runner*, so a crash is silent
+data loss rather than a visible error — which makes these the cheapest tests
+here to justify.
+
+That sweep plus a targeted review found three more:
+
+1. **Fixtures over 50 videos silently lost everything after #50.** The catalog
+   fetcher had a leftover `break` in fixture mode from an earlier design where
+   `hydrate_videos` didn't filter by id.
+2. **The default footer marker was the footer's first line** — which, for the
+   most common footer shape, is a decorative rule like `── ── ──`. Any
+   description containing a separator looked like it already had the footer, so
+   the check silently passed on every video it should have flagged. Now prefers
+   the first line containing a URL.
+3. **`captions.list` was being called for data already in hand.**
+   `contentDetails.caption` arrives free with `videos.list`; the dedicated
+   endpoint costs 50 units *per video*, which would have turned a 25-unit scan
+   of a 500-video channel into a 25,000-unit one — two and a half days of quota
+   for a boolean we already had.

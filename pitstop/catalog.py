@@ -53,8 +53,6 @@ def fetch_catalog(
         videos.extend(client.hydrate_videos(video_ids[i:i + 50]))
         tick("Fetching video details", min(i + 50, len(video_ids)),
              len(video_ids))
-        if client.mode == "FIXTURE":
-            break
 
     tick("Fetching playlists")
     playlists = client.list_playlists(channel.id)
@@ -67,17 +65,20 @@ def fetch_catalog(
         fetched_at=datetime.now(timezone.utc),
     )
 
-    # Owner-only enrichment. Both are optional because both cost something:
-    # captions.list is 50 units *per video* (so it is opt-in, never automatic
-    # on a large channel), and analytics needs OAuth. Checks that depend on
-    # these degrade to "skipped", never to a wrong answer.
+    # Caption availability is already on every video for free —
+    # `contentDetails.caption` comes back with the videos.list call we just
+    # made. The captions.list endpoint costs 50 units *per video*, so calling
+    # it for the same boolean would turn a 25-unit scan of a 500-video channel
+    # into a 25,000-unit one: two and a half days of quota for information we
+    # already have. It is only worth spending when a future check needs the
+    # actual track list (language, auto vs manual), which none do yet.
     if with_captions and catalog.is_owner:
-        tick("Checking captions", 0, len(videos))
+        tick("Checking caption tracks", 0, len(videos))
         try:
             caption_map = client.caption_availability([v.id for v in videos])
-            for v in videos:
-                if v.id in caption_map:
-                    v.caption_available = caption_map[v.id]
+            for video in videos:
+                if video.id in caption_map:
+                    video.caption_available = caption_map[video.id]
         except Exception:
             pass
 
@@ -85,9 +86,9 @@ def fetch_catalog(
         tick("Pulling retention analytics")
         try:
             retention = client.retention_metrics([v.id for v in videos])
-            for v in videos:
-                if v.id in retention:
-                    v.average_view_percentage = retention[v.id]
+            for video in videos:
+                if video.id in retention:
+                    video.average_view_percentage = retention[video.id]
         except Exception:
             # A brand-new channel returns an empty report rather than an error.
             # Checks that need retention simply don't fire.

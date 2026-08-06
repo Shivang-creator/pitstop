@@ -21,6 +21,7 @@ import json
 import secrets
 import time
 from dataclasses import asdict
+from datetime import timezone
 from pathlib import Path
 from typing import Any
 
@@ -151,7 +152,7 @@ def _run_scan(req: ScanRequest, emit) -> str:
                           "done": done, "total": total})
 
     catalog = fetch_catalog(client, req.channel, limit=req.limit,
-                            with_captions=req.owner and bool(req.limit),
+                            with_captions=False,   # see catalog.py — free via videos.list
                             with_analytics=req.owner, progress=on_fetch)
 
     emit("progress", {"phase": "checks", "stage": "Starting checks",
@@ -340,6 +341,102 @@ def _channel_url(catalog: Catalog) -> str:
 # ---------------------------------------------------------------------------
 # meta
 # ---------------------------------------------------------------------------
+
+
+class TrendingRequest(BaseModel):
+    category: str | None = None
+    region: str = Field("US", min_length=2, max_length=2)
+    compare_to: str | None = None
+    include_shorts: bool = False
+    fixture: str | None = None
+
+
+@app.post("/api/trending")
+async def trending(req: TrendingRequest):
+    """What's working in a niche right now. One quota unit."""
+    from . import benchmark as bench
+    from dataclasses import asdict as _asdict
+
+    def work() -> dict:
+        client = YouTubeClient(ledger=QuotaLedger(budget=CONFIG.quota_budget),
+                               fixture=req.fixture)
+        videos, source = bench.fetch_trending(
+            client, region=req.region, category=req.category)
+
+        yours = None
+        if req.compare_to:
+            yours = fetch_catalog(client, req.compare_to, limit=100)
+
+        report = bench.compare(
+            videos, yours.videos if yours else None, source=source,
+            include_shorts=req.include_shorts,
+            your_channel=yours.channel.title if yours else None)
+
+        payload = _asdict(report)
+        payload["practices"] = [
+            {**_asdict(p), "verdict": p.verdict} for p in report.practices
+        ]
+        payload["gaps"] = bench.gap_topics(videos, yours)
+        payload["categories"] = bench.CATEGORIES
+        return payload
+
+    try:
+        return await asyncio.to_thread(work)
+    except (YouTubeError, AuthRequired) as exc:
+        raise HTTPException(400, str(exc))
+
+
+class DraftRequest(BaseModel):
+    title: str = ""
+    description: str = ""
+    tags: list[str] = Field(default_factory=list)
+    duration_seconds: int = Field(600, ge=0, le=86400)
+
+
+@app.post("/api/draft")
+async def check_draft(req: DraftRequest):
+    """Run the checks against a video that hasn't been uploaded yet."""
+    from datetime import datetime as _dt
+
+    from .models import Channel as _Channel, Video as _Video
+
+    def work() -> dict:
+        video = _Video(
+            id="draft", title=req.title, description=req.description,
+            published_at=_dt.now(timezone.utc), tags=list(req.tags),
+            duration_seconds=req.duration_seconds, view_count=0)
+        catalog = Catalog(channel=_Channel(id="draft", title="Draft"),
+                          videos=[video], playlists=[], is_owner=True)
+
+        ctx = CheckContext(has_network=True, has_llm=CONFIG.has_llm,
+                           rules=load_rules())
+        findings, skipped = run_all(catalog, ctx)
+
+        irrelevant = {"playlist.orphan", "playlist.missing_series",
+                      "playlist.broken_items", "metadata.stale_winner"}
+        playlist_predicates = {"in_any_playlist", "in_playlist"}
+        findings = [
+            f for f in findings
+            if f.check_id not in irrelevant
+            and not (playlist_predicates & set((f.evidence.get("require") or {})))
+        ]
+
+        suggested_tags: list[str] = []
+        for finding in findings:
+            if finding.fix and finding.fix.field == "tags":
+                suggested_tags = list(finding.fix.proposed)
+                break
+
+        return {
+            "findings": [_finding_json(f, catalog)
+                         for f in scoring.rank(findings, catalog)],
+            "suggested_tags": suggested_tags,
+            "skipped": [asdict(s) for s in skipped],
+            "critical": sum(1 for f in findings
+                            if f.severity.value == "critical"),
+        }
+
+    return await asyncio.to_thread(work)
 
 
 @app.get("/api/checks")

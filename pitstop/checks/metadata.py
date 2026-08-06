@@ -36,21 +36,51 @@ class ThinTagsCheck(BaseCheck):
     id = "metadata.tags"
     name = "Too few tags"
     description = ("Tags help YouTube place a video against related content, "
-                   "especially for terms your title doesn't spell out.")
+                   "especially for terms your title doesn't spell out. With an "
+                   "LLM provider configured, Pitstop proposes tags grounded in "
+                   "your own title and description.")
     requires_owner = True   # tags are only returned to the video owner
 
+    # Suggesting tags costs one LLM call per video. On a 500-video catalog
+    # that is 500 calls, which is slow and pointless when the creator is going
+    # to review the first twenty and stop. Only the highest-traffic videos get
+    # suggestions; the rest are still reported.
+    MAX_SUGGESTIONS = 25
+
     def run(self, catalog: Catalog, ctx: CheckContext) -> Iterable[Finding]:
-        for video in catalog.videos:
-            if len(video.tags) >= MIN_TAGS:
-                continue
+        thin = [v for v in catalog.videos if len(v.tags) < MIN_TAGS]
+        # Spend the LLM budget where it earns the most.
+        by_traffic = sorted(thin, key=lambda v: -v.views_per_day)
+        suggest_for = {v.id for v in by_traffic[:self.MAX_SUGGESTIONS]}
+
+        for video in thin:
+            fix = None
+            note = ""
+            if ctx.has_llm and video.id in suggest_for:
+                try:
+                    from ..enrich import LLMUnavailable, suggest_tags
+
+                    proposed = suggest_tags(video.title, video.description,
+                                            video.tags)
+                    if proposed != video.tags:
+                        fix = Fix(field="tags", current=list(video.tags),
+                                  proposed=proposed,
+                                  note=f"suggest {len(proposed) - len(video.tags)}"
+                                       f" tags from your title/description")
+                except LLMUnavailable as exc:
+                    note = f" (suggestion unavailable: {exc})"
+                except Exception as exc:  # never let enrichment kill the check
+                    note = f" (suggestion failed: {type(exc).__name__})"
+
             yield Finding(
                 check_id=self.id,
                 severity=Severity.NOTICE if video.tags else Severity.WARNING,
                 title="No tags" if not video.tags else "Too few tags",
-                detail=f"{len(video.tags)} tag(s), target {MIN_TAGS}+",
+                detail=f"{len(video.tags)} tag(s), target {MIN_TAGS}+{note}",
                 video_id=video.id,
                 impact_views=int(video.views_per_day * 30),
                 evidence={"tags": video.tags},
+                fix=fix,
             )
 
 

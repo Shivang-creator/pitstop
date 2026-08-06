@@ -10,11 +10,12 @@ import {
   type Progress,
   type ScanResult,
 } from "./api";
+import { Discover, Draft } from "./components/Discover";
 import { Landing, Scanning } from "./components/Landing";
 import { PlanView } from "./components/PlanView";
 import { Report } from "./components/Report";
 
-type Stage = "landing" | "scanning" | "report" | "plan";
+type Stage = "landing" | "scanning" | "report" | "plan" | "discover" | "draft";
 
 export default function App() {
   const [stage, setStage] = useState<Stage>("landing");
@@ -100,6 +101,10 @@ export default function App() {
 
   if (stage === "scanning") return <Scanning progress={progress} />;
 
+  if (stage === "discover") return <Discover onBack={reset} />;
+
+  if (stage === "draft") return <Draft onBack={reset} />;
+
   if (stage === "plan" && scan && plan)
     return (
       <PlanView
@@ -127,6 +132,12 @@ export default function App() {
     );
 
   return (
-    <Landing onScan={handleScan} capabilities={capabilities} error={error} />
+    <Landing
+      onScan={handleScan}
+      onDiscover={() => setStage("discover")}
+      onDraft={() => setStage("draft")}
+      capabilities={capabilities}
+      error={error}
+    />
   );
 }
