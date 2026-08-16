@@ -30,6 +30,11 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 include = ["pitstop*"]
 
+# The public scanner's page is served from disk at request time, so it has to
+# survive a non-editable install too.
+[tool.setuptools.package-data]
+pitstop = ["web_public/*.html"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"

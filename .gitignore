@@ -14,3 +14,7 @@ web/dist/
 build/
 dist/
 web/tsconfig.tsbuildinfo
+.vercel
+.env*
+# …but the template carries no secrets and is the setup instructions.
+!.env.example

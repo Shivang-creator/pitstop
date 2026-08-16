@@ -1,0 +1,37 @@
+# What never leaves this machine.
+#
+# A .vercelignore REPLACES .gitignore for uploads rather than adding to it, so
+# every secret has to be named here again even though git already ignores it.
+# Getting this wrong uploads credentials into a function bundle, which is worse
+# than committing them — there is no `git rm` for a deployment.
+.env
+.env.*
+client_secret.json
+.pitstop/
+*.db
+
+# The operator's own conventions. `public_scan` passes rules={} so a stranger's
+# channel is never graded against them, but there is no reason to ship the file.
+pitstop.yaml
+
+# Local development only.
+.git/
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.python-version
+.DS_Store
+
+# The local React UI (`pitstop serve`). The deployed scanner serves its own
+# single page from pitstop/web_public/ and never touches this.
+web/
+
+# Not reachable at runtime.
+tests/
+scripts/
+fixtures/
+*.md

@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pitstop — audit any YouTube back catalog</title>
+<meta name="description" content="Paste any YouTube channel. Get a health score, a category breakdown and the money leaks ranked by what they're costing. Read-only, no login." />
+<meta property="og:title" content="Pitstop — audit any YouTube back catalog" />
+<meta property="og:description" content="Score any channel's back catalog in under a minute. No login, no OAuth, read-only." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+/* ── Design system ───────────────────────────────────────────────────────
+   Inherited verbatim from the shipped product (web/src/index.css) so the
+   public scanner and the local UI read as one tool. The governing rule there
+   is worth repeating: colour is reserved almost entirely for severity. A
+   report returns a few hundred findings, and if everything is coloured then
+   severity stops reading as severity. */
+:root {
+  --ink-950:#08090b; --ink-900:#0d0f13; --ink-850:#14171d; --ink-800:#1b1f27;
+  --ink-700:#262b35; --ink-600:#39404d; --ink-400:#6b7482; --ink-300:#9aa3b0;
+  --ink-200:#c7ccd4;
+  --critical:#ff5d5d; --critical-dim:#3d1618;
+  --warning:#ffb340;  --warning-dim:#3a2a10;
+  --notice:#58b8ff;   --notice-dim:#10283d;
+  --good:#3ddc97;     --good-dim:#0f2f24;
+  --orange:#ff8f4d;
+  --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --gutter:clamp(1.1rem,4vw,2.5rem);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--ink-950); color:var(--ink-200);
+  font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  font-feature-settings:"cv02","cv03","cv04","tnum"; line-height:1.55;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(900px 500px at 15% -5%, rgba(88,184,255,.07), transparent 60%),
+    radial-gradient(700px 400px at 90% 0%, rgba(61,220,151,.05), transparent 55%);
+}
+.wrap{position:relative; z-index:1; max-width:60rem; margin:0 auto; padding:0 var(--gutter) 6rem}
+::selection{background:rgba(88,184,255,.28)}
+a{color:inherit}
+h1,h2,h3{margin:0; font-weight:600; letter-spacing:-.02em; line-height:1.15}
+
+/* ── Masthead ─────────────────────────────────────────────────────────── */
+.masthead{display:flex; align-items:center; justify-content:space-between;
+  gap:1rem; flex-wrap:wrap; padding:1.6rem 0 0}
+.brand{display:flex; align-items:baseline; gap:.6rem;
+  font-family:var(--mono); font-weight:700; font-size:1.05rem; letter-spacing:-.03em}
+.brand .dot{width:.5rem; height:.5rem; border-radius:50%; background:var(--good);
+  align-self:center; box-shadow:0 0 10px var(--good)}
+/* The read-only badge is the single most load-bearing sentence on the page:
+   it is why a stranger can use this at all. It sits in the masthead, not in
+   a footnote. */
+.badge{font-family:var(--mono); font-size:.72rem; letter-spacing:.04em;
+  color:var(--good); background:var(--good-dim); border:1px solid rgba(61,220,151,.28);
+  padding:.32rem .6rem; border-radius:999px; white-space:nowrap}
+
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+.hero{padding:clamp(3rem,9vw,5.5rem) 0 0}
+.hero h1{font-size:clamp(2.1rem,6.4vw,3.6rem); letter-spacing:-.035em; max-width:16ch}
+.hero h1 em{font-style:normal; color:var(--critical)}
+.hero p{margin:1.1rem 0 0; max-width:48ch; color:var(--ink-300); font-size:1.06rem}
+
+/* ── Search ───────────────────────────────────────────────────────────── */
+form{margin:2.2rem 0 0; display:flex; gap:.6rem; flex-wrap:wrap}
+.field{flex:1 1 22rem; position:relative; display:flex; align-items:center}
+.field span{position:absolute; left:1rem; font-family:var(--mono);
+  color:var(--ink-600); pointer-events:none; font-size:.95rem}
+input{
+  width:100%; padding:.95rem 1rem .95rem 2.4rem; border-radius:.7rem;
+  background:var(--ink-900); border:1px solid var(--ink-700); color:var(--ink-200);
+  font-family:var(--mono); font-size:1rem; transition:border-color .16s, box-shadow .16s;
+}
+input::placeholder{color:var(--ink-600)}
+input:focus{outline:none; border-color:var(--notice); box-shadow:0 0 0 3px rgba(88,184,255,.16)}
+button{
+  padding:.95rem 1.6rem; border-radius:.7rem; border:1px solid transparent;
+  background:var(--ink-200); color:var(--ink-950); font-family:var(--sans);
+  font-weight:600; font-size:.98rem; cursor:pointer; transition:transform .12s, opacity .16s;
+}
+button:hover:not(:disabled){transform:translateY(-1px)}
+button:disabled{opacity:.5; cursor:progress}
+:focus-visible{outline:2px solid var(--notice); outline-offset:2px}
+
+.examples{margin:.9rem 0 0; display:flex; gap:.45rem; flex-wrap:wrap; align-items:center}
+.examples b{font-weight:400; color:var(--ink-600); font-size:.82rem; margin-right:.15rem}
+.chip{font-family:var(--mono); font-size:.8rem; color:var(--ink-300);
+  background:var(--ink-900); border:1px solid var(--ink-700); border-radius:999px;
+  padding:.3rem .7rem; cursor:pointer; transition:border-color .16s, color .16s}
+.chip:hover{border-color:var(--ink-600); color:var(--ink-200)}
+
+/* ── Progress ─────────────────────────────────────────────────────────── */
+#progress{margin:2.4rem 0 0; display:none}
+#progress.on{display:block}
+.pbar{height:3px; background:var(--ink-800); border-radius:2px; overflow:hidden}
+.pbar i{display:block; height:100%; width:0; background:var(--notice);
+  transition:width .35s cubic-bezier(.16,1,.3,1)}
+.pmeta{margin:.7rem 0 0; display:flex; justify-content:space-between; gap:1rem;
+  font-family:var(--mono); font-size:.82rem; color:var(--ink-400)}
+
+/* ── Error ────────────────────────────────────────────────────────────── */
+#error{margin:2.4rem 0 0; display:none; border-radius:.8rem; padding:1.1rem 1.2rem;
+  border:1px solid var(--critical-dim); background:rgba(255,93,93,.06)}
+#error.on{display:block}
+#error h3{font-size:1rem; color:var(--critical)}
+#error p{margin:.45rem 0 0; color:var(--ink-300); font-size:.92rem}
+#error code{font-family:var(--mono); font-size:.82rem; color:var(--ink-400);
+  display:block; margin-top:.6rem; word-break:break-word}
+
+/* ── Report ───────────────────────────────────────────────────────────── */
+#report{display:none}
+#report.on{display:block}
+section{margin:3.4rem 0 0}
+.eyebrow{font-family:var(--mono); font-size:.74rem; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink-600); margin:0 0 1rem}
+.card{background:var(--ink-900); border:1px solid var(--ink-700); border-radius:.9rem}
+
+/* Channel identity */
+.chan{display:flex; align-items:center; gap:.9rem; padding:1.1rem 1.2rem;
+  border-bottom:1px solid var(--ink-800)}
+.chan img{width:44px; height:44px; border-radius:50%; background:var(--ink-800); flex:0 0 auto}
+.chan h2{font-size:1.12rem}
+.chan p{margin:.15rem 0 0; font-family:var(--mono); font-size:.78rem; color:var(--ink-400)}
+
+/* ── Signature: the grade scale ───────────────────────────────────────────
+   A ring shows a number. This shows the number *against the rubric that
+   produced it* — the A/B/C/D boundaries are drawn as labelled ticks, so 78
+   reads as "two points below a B" rather than as a decorative arc. The score
+   model is published and reconstructable by hand; the gauge is the visual
+   form of that claim. */
+.gauge{padding:1.5rem 1.2rem 1.3rem}
+.gtop{display:flex; align-items:flex-end; gap:1rem; flex-wrap:wrap}
+.grade{font-family:var(--mono); font-weight:700; font-size:clamp(3.2rem,11vw,4.6rem);
+  line-height:.85; letter-spacing:-.06em}
+.gnum{font-family:var(--mono); font-size:1.05rem; color:var(--ink-400); padding-bottom:.35rem}
+.gnum b{color:var(--ink-200); font-weight:500}
+.ghead{margin-left:auto; text-align:right; color:var(--ink-300); font-size:.95rem;
+  max-width:26ch; padding-bottom:.3rem}
+.scale{margin:1.5rem 0 0; position:relative; height:10px; border-radius:5px;
+  background:var(--ink-800); overflow:hidden}
+.scale i{display:block; height:100%; width:0; border-radius:5px;
+  transition:width 1.05s cubic-bezier(.16,1,.3,1)}
+.ticks{position:relative; height:1.35rem; margin-top:.3rem}
+.tick{position:absolute; top:0; transform:translateX(-50%); font-family:var(--mono);
+  font-size:.7rem; color:var(--ink-600); white-space:nowrap}
+.tick::before{content:""; position:absolute; left:50%; top:-.62rem; width:1px;
+  height:.42rem; background:var(--ink-700)}
+
+/* Category rows */
+.cats{border-top:1px solid var(--ink-800)}
+.cat{display:grid; grid-template-columns:9.5rem 1fr auto; gap:1rem; align-items:center;
+  padding:.85rem 1.2rem; border-bottom:1px solid var(--ink-850)}
+.cat:last-child{border-bottom:none}
+.cat .lbl{font-size:.92rem}
+.cat .lbl small{display:block; color:var(--ink-600); font-size:.75rem; font-weight:400}
+.track{height:6px; border-radius:3px; background:var(--ink-800); overflow:hidden}
+.track i{display:block; height:100%; width:0; border-radius:3px;
+  transition:width .9s cubic-bezier(.16,1,.3,1)}
+.cat .val{font-family:var(--mono); font-size:.92rem; text-align:right; min-width:6.5rem}
+.cat .val small{color:var(--ink-600); font-size:.74rem}
+
+/* Findings */
+.find{display:grid; grid-template-columns:1.6rem 1fr; gap:.9rem;
+  padding:1rem 1.2rem; border-bottom:1px solid var(--ink-850)}
+.find:last-child{border-bottom:none}
+.rank{font-family:var(--mono); font-size:.8rem; color:var(--ink-600); padding-top:.15rem}
+.fhead{display:flex; align-items:baseline; gap:.55rem; flex-wrap:wrap}
+.fhead h3{font-size:.98rem}
+.sev{width:.5rem; height:.5rem; border-radius:50%; flex:0 0 auto; align-self:center}
+.count{font-family:var(--mono); font-size:.8rem; color:var(--ink-400)}
+.pill{font-family:var(--mono); font-size:.7rem; padding:.16rem .48rem; border-radius:999px;
+  border:1px solid var(--ink-700); color:var(--ink-400)}
+.pill.fix{color:var(--good); border-color:rgba(61,220,151,.3); background:var(--good-dim)}
+.cost{margin-left:auto; font-family:var(--mono); font-size:.82rem; color:var(--ink-300)}
+.fdesc{margin:.4rem 0 0; color:var(--ink-400); font-size:.86rem; max-width:72ch}
+.inst{margin:.7rem 0 0; padding:0; list-style:none; display:grid; gap:.3rem}
+.inst li{font-size:.82rem; color:var(--ink-400); display:flex; gap:.5rem;
+  align-items:baseline; min-width:0}
+.inst a{color:var(--ink-300); text-decoration:none; border-bottom:1px solid var(--ink-700);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:26rem; flex:0 1 auto}
+.inst a:hover{color:var(--notice); border-color:var(--notice)}
+.inst em{font-style:normal; font-family:var(--mono); font-size:.76rem;
+  color:var(--ink-600); flex:1 1 auto; min-width:0; overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap}
+
+/* ── Honest limits ────────────────────────────────────────────────────────
+   Given a full section with a heading rather than a footnote. Every scan has
+   a boundary; a report that hides its own reads as one that has never been
+   tested. */
+.limit{padding:.95rem 1.2rem; border-bottom:1px solid var(--ink-850)}
+.limit:last-child{border-bottom:none}
+.limit h3{font-size:.92rem; color:var(--warning); display:flex; gap:.5rem; align-items:center}
+.limit h3::before{content:""; width:.45rem; height:.45rem; border-radius:1px;
+  background:var(--warning); transform:rotate(45deg); flex:0 0 auto}
+.limit p{margin:.35rem 0 0; color:var(--ink-400); font-size:.87rem; max-width:76ch}
+.limit.locked h3{color:var(--notice)}
+.limit.locked h3::before{background:var(--notice)}
+
+/* ── The split ────────────────────────────────────────────────────────── */
+.split{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--ink-700);
+  border:1px solid var(--ink-700); border-radius:.9rem; overflow:hidden}
+.half{background:var(--ink-900); padding:1.3rem 1.3rem 1.5rem}
+.half h3{font-size:1rem; display:flex; align-items:center; gap:.5rem}
+.half > p{margin:.5rem 0 1rem; color:var(--ink-400); font-size:.88rem}
+.half.here{background:var(--ink-850)}
+pre{margin:0; background:var(--ink-950); border:1px solid var(--ink-800);
+  border-radius:.55rem; padding:.85rem .95rem; overflow-x:auto;
+  font-family:var(--mono); font-size:.8rem; line-height:1.75; color:var(--ink-300)}
+pre b{color:var(--good); font-weight:500}
+pre i{color:var(--ink-600); font-style:normal}
+
+/* ── Footer ───────────────────────────────────────────────────────────── */
+footer{margin:4rem 0 0; padding-top:1.6rem; border-top:1px solid var(--ink-850);
+  color:var(--ink-600); font-size:.82rem; display:flex; justify-content:space-between;
+  gap:1rem; flex-wrap:wrap}
+footer a{color:var(--ink-400)}
+
+.rise{animation:rise .5s cubic-bezier(.16,1,.3,1) both}
+@keyframes rise{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+
+@media (max-width:640px){
+  .cat{grid-template-columns:1fr auto; gap:.5rem .8rem}
+  .cat .track{grid-column:1/-1; order:3}
+  .split{grid-template-columns:1fr}
+  .ghead{margin-left:0; text-align:left; max-width:none}
+  .inst a{max-width:100%}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important; animation-iteration-count:1 !important;
+    transition-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="brand"><span class="dot"></span> pitstop</div>
+    <div class="badge">read-only · no login · nothing is changed</div>
+  </header>
+
+  <div class="hero">
+    <h1>Your back catalog is <em>rotting</em>.</h1>
+    <p>
+      Dead affiliate links, videos in no playlist, chapters YouTube silently
+      rejects — on videos still pulling traffic every day. Paste any channel and
+      Pitstop grades the damage and prices it.
+    </p>
+
+    <form id="form" autocomplete="off">
+      <label class="field">
+        <span>@</span>
+        <input id="channel" name="channel" placeholder="handle, or a full youtube.com/… URL"
+               aria-label="YouTube channel handle or URL" required />
+      </label>
+      <button id="go" type="submit">Inspect</button>
+    </form>
+
+    <div class="examples">
+      <b>Try</b>
+      <button class="chip" type="button" data-ch="@mkbhd">@mkbhd</button>
+      <button class="chip" type="button" data-ch="@veritasium">@veritasium</button>
+      <button class="chip" type="button" data-ch="@kurzgesagt">@kurzgesagt</button>
+      <button class="chip" type="button" data-ch="@TED">@TED</button>
+    </div>
+
+    <div id="progress">
+      <div class="pbar"><i id="pfill"></i></div>
+      <div class="pmeta"><span id="pstage">Starting</span><span id="pcount"></span></div>
+    </div>
+
+    <div id="error" role="alert">
+      <h3 id="etitle"></h3>
+      <p id="emsg"></p>
+      <code id="ehint"></code>
+    </div>
+  </div>
+
+  <main id="report" aria-live="polite"></main>
+
+  <footer>
+    <span>Independent project. Not affiliated with YouTube or Google. Official APIs only — no scraping.</span>
+    <span id="meta"></span>
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+const $ = (id) => document.getElementById(id);
+const form = $("form"), input = $("channel"), go = $("go");
+const progress = $("progress"), pfill = $("pfill"), pstage = $("pstage"), pcount = $("pcount");
+const errBox = $("error"), report = $("report");
+
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g,
+  (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const num = (n) => Number(n || 0).toLocaleString();
+
+/* Thresholds copied from the product's own ui.tsx so a score is the same
+   colour here as it is in the local app. */
+function scoreColor(s) {
+  if (s >= 80) return "var(--good)";
+  if (s >= 60) return "var(--warning)";
+  if (s >= 40) return "var(--orange)";
+  return "var(--critical)";
+}
+const SEV = { critical:"var(--critical)", warning:"var(--warning)", notice:"var(--notice)" };
+
+/* ── progress ─────────────────────────────────────────────────────────── */
+/* Weighted because the phases are wildly unequal: resolving a few hundred
+   links takes many times longer than fetching the video list, and a bar that
+   moves at a constant rate per phase would stall visibly at the end. */
+function setProgress(p) {
+  const total = p.total || 0, done = p.done || 0;
+  const within = total ? Math.min(1, done / total) : 0;
+  const pct = p.phase === "fetch" ? 6 + within * 24 : 32 + within * 66;
+  pfill.style.width = Math.max(6, pct) + "%";
+  pstage.textContent = p.stage || "Working";
+  pcount.textContent = total ? `${num(done)} / ${num(total)}` : "";
+}
+
+function showError(kind, message, hint) {
+  progress.classList.remove("on");
+  errBox.classList.add("on");
+  $("etitle").textContent = {
+    not_found: "Channel not found",
+    quota: "Out of API quota",
+    config: "Scanner not configured",
+    upstream: "YouTube did not answer",
+  }[kind] || "That didn't work";
+  $("emsg").textContent = message || "";
+  $("ehint").textContent = hint || "";
+  $("ehint").style.display = hint ? "block" : "none";
+}
+
+/* ── render ───────────────────────────────────────────────────────────── */
+function render(d) {
+  const s = d.score, c = d.channel;
+  const color = scoreColor(s.score);
+
+  const ticks = [[0,"F"],[60,"D"],[70,"C"],[80,"B"],[90,"A"]]
+    .map(([v,g]) => `<span class="tick" style="left:${Math.max(1.4, Math.min(98.6, v))}%">${g}</span>`)
+    .join("");
+
+  const cats = s.categories.map((cat) => `
+    <div class="cat">
+      <div class="lbl">${esc(cat.label)}<small>${esc(cat.description)}</small></div>
+      <div class="track"><i data-w="${cat.score}" style="background:${scoreColor(cat.score)}"></i></div>
+      <div class="val">${cat.score}<small> /100 · ${num(cat.findings)} found</small></div>
+    </div>`).join("");
+
+  const findings = d.groups.map((g, i) => {
+    const inst = g.instances.filter((x) => x.video_url).map((x) => `
+      <li><a href="${esc(x.video_url)}" target="_blank" rel="noopener noreferrer">${esc(x.video_title || x.video_id)}</a>
+      <em>${esc(x.detail)}</em></li>`).join("");
+    return `
+    <div class="find">
+      <div class="rank">${String(i + 1).padStart(2, "0")}</div>
+      <div>
+        <div class="fhead">
+          <span class="sev" style="background:${SEV[g.severity] || "var(--ink-600)"}"></span>
+          <h3>${esc(g.title)}</h3>
+          <span class="count">×${num(g.count)}</span>
+          ${g.auto_fixable ? `<span class="pill fix">${num(g.auto_fixable)} auto-fixable</span>` : ""}
+          <span class="cost">~${num(g.impact_views)} views/mo affected</span>
+        </div>
+        <p class="fdesc">${esc(g.description)}</p>
+        ${inst ? `<ul class="inst">${inst}</ul>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+
+  /* Caps that bit, plus the checks that cannot run without ownership. Both
+     are real boundaries of this scan and both are stated on screen. */
+  const limits = (d.limits || []).map((l) => `
+    <div class="limit"><h3>${esc(l.label)}</h3><p>${esc(l.detail)}</p></div>`).join("");
+  /* Only the ownership-gated skips belong here. A check switched off because
+     the playlist list was capped is already explained by its own limit above,
+     and counting it as "needs ownership" would misstate why it didn't run. */
+  const owned = (d.skipped || []).filter((x) => /ownership/i.test(x.reason || ""));
+  const locked = owned.length ? `
+    <div class="limit locked">
+      <h3>${owned.length} of ${d.checks_total} checks need channel ownership</h3>
+      <p>${owned.map((x) => esc(x.name)).join(" and ")} —
+      YouTube returns tags and playlist item states only to the account that owns
+      the channel, so a public scan genuinely cannot see them. They run in the
+      CLI after <code style="font-family:var(--mono)">pitstop connect</code>.</p>
+    </div>` : "";
+
+  const truncated = (d.limits || []).some((l) => l.key === "videos");
+  const scope = truncated
+    ? `${num(d.videos_scanned)} of ${num(c.video_count)} videos`
+    : `all ${num(d.videos_scanned)} videos`;
+
+  report.innerHTML = `
+    <section class="rise">
+      <div class="card">
+        <div class="chan">
+          ${c.thumbnail_url ? `<img src="${esc(c.thumbnail_url)}" alt="" loading="lazy" />` : ""}
+          <div>
+            <h2>${esc(c.title)}</h2>
+            <p>${num(c.subscriber_count)} subscribers · ${scope} scored ·
+               ${num(d.playlists_scanned)} playlists · ${d.checks_run}/${d.checks_total} checks run</p>
+          </div>
+        </div>
+
+        <div class="gauge">
+          <div class="gtop">
+            <div class="grade" style="color:${color}">${esc(s.grade)}</div>
+            <div class="gnum"><b>${s.score}</b>/100</div>
+            <div class="ghead">${esc(s.headline)}</div>
+          </div>
+          <div class="scale"><i id="gfill" style="background:${color}"></i></div>
+          <div class="ticks">${ticks}</div>
+        </div>
+
+        <div class="cats">${cats}</div>
+      </div>
+    </section>
+
+    <section>
+      <p class="eyebrow">What it's costing — ranked by traffic at risk</p>
+      <div class="card">${findings || '<div class="find"><div class="rank">—</div><div><h3>Nothing found. This catalog is clean.</h3></div></div>'}</div>
+      ${d.group_total > d.groups.length
+        ? `<p class="fdesc" style="padding:.8rem 0 0">Showing the top ${d.groups.length} of ${d.group_total} finding types.
+           <code style="font-family:var(--mono)">pitstop scan</code> lists them all.</p>` : ""}
+    </section>
+
+    <section>
+      <p class="eyebrow">What this scan did not do</p>
+      <div class="card">
+        ${limits}${locked}
+        ${!limits && !locked ? '<div class="limit"><h3>Nothing was capped</h3><p>This channel fit inside every ceiling — the whole catalog was scored.</p></div>' : ""}
+      </div>
+    </section>
+
+    <section>
+      <p class="eyebrow">Finding it is half the job</p>
+      <div class="split">
+        <div class="half here">
+          <h3><span class="sev" style="background:var(--notice)"></span> This page audits</h3>
+          <p>Any channel, no login, nothing written. It reads what YouTube gives
+             out publicly and grades it.</p>
+          <pre><i># you just did this</i>
+paste a handle → score + priced findings</pre>
+        </div>
+        <div class="half">
+          <h3><span class="sev" style="background:var(--good)"></span> The CLI repairs</h3>
+          <p>Fixing a channel means writing to it, which YouTube only permits with
+             OAuth on a channel you own. So repairs live where the credentials do.</p>
+          <pre>pip install -e .
+<b>pitstop connect</b>   <i># one-time OAuth</i>
+<b>pitstop plan</b> ${esc(c.handle ? "@" + c.handle : c.id)}   <i># the diff. changes nothing</i>
+<b>pitstop apply</b> ${esc(c.handle ? "@" + c.handle : c.id)}  <i># ${num(s.auto_fixable)} fixes, for real</i></pre>
+        </div>
+      </div>
+    </section>`;
+
+  report.classList.add("on");
+
+  const cached = d.cached_age_seconds != null;
+  $("meta").textContent =
+    `${d.quota_spent} quota units · ${cached ? `cached ${Math.round(d.cached_age_seconds / 60)} min ago` : `${d.elapsed_seconds}s`}`;
+
+  /* One orchestrated arrival: the gauge sweeps to the score, the category
+     bars follow. Everything else is static. */
+  requestAnimationFrame(() => {
+    $("gfill").style.width = s.score + "%";
+    report.querySelectorAll(".track i").forEach((el) => { el.style.width = el.dataset.w + "%"; });
+  });
+
+  /* The report lands below the fold on a laptop, so a finished scan otherwise
+     looks like nothing happened. Bring it to the top of the viewport — but
+     honour a reduced-motion preference, where a sudden smooth scroll is the
+     exact thing being opted out of. */
+  const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  report.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+}
+
+/* ── run ──────────────────────────────────────────────────────────────── */
+let running = false;
+
+async function scan(channel) {
+  if (running) return;
+  running = true;
+  go.disabled = true;
+  go.textContent = "Inspecting…";
+  errBox.classList.remove("on");
+  report.classList.remove("on");
+  progress.classList.add("on");
+  pfill.style.width = "6%";
+  pstage.textContent = "Resolving channel";
+  pcount.textContent = "";
+
+  try {
+    const res = await fetch("/api/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ channel }),
+    });
+
+    if (!res.ok || !res.body) {
+      /* The stream never opened — fall back to the plain JSON twin so a
+         proxy that dislikes SSE cannot take the whole page down. */
+      const alt = await fetch("/api/scan.json", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ channel }),
+      });
+      const data = await alt.json();
+      if (!alt.ok) { showError(data.error, data.message, data.hint); return; }
+      progress.classList.remove("on");
+      render(data);
+      return;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      let split;
+      while ((split = buffer.indexOf("\n\n")) !== -1) {
+        const chunk = buffer.slice(0, split);
+        buffer = buffer.slice(split + 2);
+
+        let event = "message", data = "";
+        for (const line of chunk.split("\n")) {
+          if (line.startsWith("event:")) event = line.slice(6).trim();
+          else if (line.startsWith("data:")) data += line.slice(5).trim();
+        }
+        if (!data) continue;
+        const payload = JSON.parse(data);
+
+        if (event === "progress") setProgress(payload);
+        else if (event === "result") { progress.classList.remove("on"); render(payload); }
+        else if (event === "error") showError(payload.kind, payload.message, payload.hint);
+      }
+    }
+  } catch (err) {
+    showError("upstream", "Lost the connection to the scanner before it finished.",
+              String(err));
+  } finally {
+    running = false;
+    go.disabled = false;
+    go.textContent = "Inspect";
+  }
+}
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const v = input.value.trim();
+  if (!v) return;
+  history.replaceState(null, "", "?channel=" + encodeURIComponent(v));
+  scan(v);
+});
+
+document.querySelectorAll(".chip").forEach((chip) => {
+  chip.addEventListener("click", () => {
+    input.value = chip.dataset.ch;
+    form.requestSubmit();
+  });
+});
+
+/* Shareable: /?channel=@mkbhd runs on load. */
+const preset = new URLSearchParams(location.search).get("channel");
+if (preset) { input.value = preset; scan(preset); }
+</script>
+</body>
+</html>
