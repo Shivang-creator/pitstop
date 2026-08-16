@@ -254,10 +254,20 @@ def scan(
     top: int = typer.Option(8, "--top", help="How many finding groups to show"),
     rules_file: Optional[Path] = typer.Option(None, "--rules",
                                               help="Path to pitstop.yaml"),
-    json_out: Optional[Path] = typer.Option(None, "--json",
-                                            help="Also write the full report as JSON"),
+    json_out: Optional[str] = typer.Option(
+        None, "--json", metavar="PATH",
+        help="Write the full report as JSON. Use '-' for stdout."),
 ):
     """Audit a channel. Read-only — this never changes anything."""
+    # `--json -` makes the command a pipe: stdout carries nothing but the
+    # report, and every human-facing byte — progress, tables, errors — moves to
+    # stderr, so `pitstop scan @x --json - | jq` works and you still watch the
+    # scan happen. Anything less than this is a flag that claims to be
+    # scriptable without being it.
+    to_stdout = json_out == "-"
+    if to_stdout:
+        console.file = sys.stderr
+
     catalog, findings, skipped, client = _scan(
         channel, fixture=fixture, owner=owner, limit=limit,
         budget=CONFIG.quota_budget, rules_path=rules_file)
@@ -290,8 +300,12 @@ def scan(
         console.print(f"\n  [bold]Next:[/] [cyan]pitstop plan {channel}[/] "
                       f"[dim]— see exactly what would change[/]\n")
 
-    if json_out:
-        _write_json(json_out, catalog, findings, report, client)
+    if to_stdout:
+        json.dump(_report_payload(catalog, findings, report, client),
+                  sys.stdout, indent=2, default=str)
+        sys.stdout.write("\n")
+    elif json_out:
+        _write_json(Path(json_out), catalog, findings, report, client)
         console.print(f"[dim]Report written to {json_out}[/]")
 
 
@@ -1049,16 +1063,22 @@ def _diff_lines(before: str, after: str, *, full: bool) -> list[str]:
     return out
 
 
-def _write_json(path: Path, catalog: Catalog, findings: list[Finding],
-                report: scoring.ScoreReport, client: YouTubeClient) -> None:
-    import json
+def _report_payload(catalog: Catalog, findings: list[Finding],
+                    report: scoring.ScoreReport,
+                    client: YouTubeClient) -> dict:
     from dataclasses import asdict
 
-    payload = {
+    return {
         "channel": asdict(catalog.channel),
         "score": asdict(report),
         "quota": {"spent": client.ledger.spent,
                   "budget": client.ledger.budget},
+        "scanned": {
+            "videos": len(catalog.videos),
+            "playlists": len(catalog.playlists),
+            "videos_truncated": catalog.videos_truncated,
+            "playlists_truncated": catalog.playlists_truncated,
+        },
         "findings": [
             {"check_id": f.check_id, "severity": f.severity.value,
              "title": f.title, "detail": f.detail, "video_id": f.video_id,
@@ -1067,8 +1087,14 @@ def _write_json(path: Path, catalog: Catalog, findings: list[Finding],
             for f in scoring.rank(findings, catalog)
         ],
     }
-    path.write_text(json.dumps(payload, indent=2, default=str),
-                    encoding="utf-8")
+
+
+def _write_json(path: Path, catalog: Catalog, findings: list[Finding],
+                report: scoring.ScoreReport, client: YouTubeClient) -> None:
+    path.write_text(
+        json.dumps(_report_payload(catalog, findings, report, client),
+                   indent=2, default=str),
+        encoding="utf-8")
 
 
 def main() -> None:

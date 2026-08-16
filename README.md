@@ -2,6 +2,14 @@
 
 **Your YouTube back catalog is rotting. Pitstop finds the rot, prices it, and fixes it.**
 
+### → Audit any channel right now: **[pitstop-lime.vercel.app](https://pitstop-lime.vercel.app)**
+
+No install, no login, no OAuth. Paste a handle, get a graded report in about
+ten seconds. It reads only what YouTube publishes to everyone, so it works on
+channels you have nothing to do with — try
+[`@mkbhd`](https://pitstop-lime.vercel.app/?channel=@mkbhd) or
+[`@veritasium`](https://pitstop-lime.vercel.app/?channel=@veritasium).
+
 A creator four years in has 200 videos. Video #47 still pulls 400 views a day —
 YouTube keeps recommending it. It also has a dead affiliate link, sits in no
 playlist, has no chapters, and carries a title written for a trend that ended
@@ -99,10 +107,47 @@ quota unit** — `videos.list(chart="mostPopular")` is the cheapest useful
 endpoint YouTube exposes.
 
 `scan` works on any public channel with nothing but an API key, which is what
-makes "paste a URL, get a score in 40 seconds" possible with zero setup. `plan`
-and `apply` need OAuth, because they write.
+makes the hosted page above possible with zero setup — a 150-video audit lands
+in roughly 9-25 seconds depending on how many links the descriptions carry.
+`plan` and `apply` need OAuth, because they write.
 
-There is also a web UI covering the same flow:
+---
+
+## The web page audits. The CLI repairs.
+
+That split is not a packaging decision, it is what YouTube's own API permits.
+Reading a channel's videos, titles, descriptions, playlists and view counts
+needs nothing but an API key. **Changing** any of it needs OAuth from the
+account that owns the channel. So the two halves live where their credentials
+do:
+
+| | [the hosted page](https://pitstop-lime.vercel.app) | the CLI |
+|---|---|---|
+| Whose channel | anyone's | one you own |
+| Credential | none — the deployment holds its own API key | your OAuth token |
+| What it does | all 19 checks, scores, ranks by traffic at risk | the same, then **applies** the repairs |
+| Checks that run | 17 of 19 | 19 of 19 |
+| Writes anything | **no — structurally, see below** | yes, behind a reviewable diff |
+
+The deployed app is `pitstop/web_app.py`, and it is a different program from the
+local UI rather than a mode of it. It never imports `applier` or `planner` and
+builds its YouTube client with `owner=False`, so there is no write path in its
+import graph to disable — asserted in `tests/test_public_scan.py` by importing
+it in a clean interpreter and failing if the writer appears in `sys.modules`.
+
+Two checks (`metadata.tags`, `playlist.broken_items`) need ownership, because
+YouTube returns tags and playlist item state only to the owning account. The
+page says so on screen rather than quietly scoring 17 checks and calling it 19.
+
+**A public scan is bounded, and every ceiling that bites is printed on the
+page**: 150 most-recent videos, 60 playlists, 400 unique links resolved
+highest-traffic-first within an 18-second budget. Links past the ceiling are
+reported as *unknown*, never as dead — a budget is allowed to cost findings and
+never to invent one. Past 60 playlists the two orphan checks switch themselves
+off, because a video whose only playlist went unfetched would otherwise be
+reported as orphaned by our own truncation.
+
+The local UI, which also plans and applies, is unchanged:
 
 ```bash
 pitstop serve      # → http://127.0.0.1:8000
@@ -190,12 +235,24 @@ Then `pitstop auth` once.
 Staying in Testing mode means no Google verification review. Refresh tokens
 expire after 7 days, which is irrelevant for personal use.
 
-**Web UI:**
+**Local web UI** (the one that can also plan and apply):
 
 ```bash
 cd web && npm install && npm run build && cd ..
 .venv/bin/pitstop serve
 ```
+
+**Deploy your own public scanner** — one environment variable, no build step:
+
+```bash
+vercel link && vercel env add YOUTUBE_API_KEY production && vercel deploy --prod
+```
+
+`vercel.json` points the FastAPI runtime at `app.py`; `.vercelignore` keeps
+`.env`, `client_secret.json`, `.pitstop/` and your `pitstop.yaml` out of the
+bundle. Check the deployed URL answers **200 while signed out** — Vercel turns
+SSO deployment protection on by default, which serves judges a login wall
+instead of your site.
 
 ---
 
@@ -296,10 +353,19 @@ That choice is why "scan any channel, free, no login" is viable at all.
 ## Development
 
 ```bash
-.venv/bin/python -m pytest        # 204 tests
+.venv/bin/python -m pytest        # 223 tests
 .venv/bin/pitstop checks          # list every check and what it needs
-cd web && npm run dev             # UI on :5173, proxies /api to :8000
+.venv/bin/pitstop scan @x --json - | jq   # stdout is pure JSON; the report goes to stderr
+uvicorn app:app --reload          # the public scanner, exactly as deployed
+cd web && npm run dev             # local UI on :5173, proxies /api to :8000
 ```
+
+Nineteen of those tests cover the public scanner specifically, and the ones
+worth knowing about assert things that are easy to get wrong and invisible when
+you do: that a link the budget never reached is never reported as dead, that
+truncation always surfaces as a stated limit, that the API key cannot appear in
+an error message, and that the web layer and the CLI produce byte-identical
+scores when the link results are held constant.
 
 Architecture and design decisions: [ARCHITECTURE.md](ARCHITECTURE.md).
 
