@@ -171,6 +171,12 @@ class Catalog:
     # analytics, and makes `apply` possible.
     is_owner: bool = False
     fetched_at: datetime | None = None
+    # True when a caller-supplied cap stopped the fetch short. `videos` being
+    # incomplete only means the scan saw less; `playlists` being incomplete
+    # actively breaks the orphan checks, since a video whose only playlist was
+    # never fetched looks like it belongs to none.
+    videos_truncated: bool = False
+    playlists_truncated: bool = False
 
     def video(self, video_id: str) -> Video | None:
         return next((v for v in self.videos if v.id == video_id), None)

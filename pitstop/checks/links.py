@@ -51,6 +51,10 @@ class LinkStatus:
     DEAD = "dead"
     BLOCKED = "blocked"        # host refuses bots — works fine for humans
     UNVERIFIED = "unverified"  # transient or ambiguous; we do not guess
+    # Never even attempted: a caller-supplied budget ran out first. Distinct
+    # from UNVERIFIED so a report can say "we did not look" rather than the
+    # much weaker "we looked and could not tell".
+    UNREACHED = "unreached"
 
 
 # Only these mean "the resource is genuinely gone".
@@ -118,38 +122,63 @@ async def _probe(client: httpx.AsyncClient, url: str,
             return LinkStatus.UNVERIFIED, None, url
 
 
-async def _probe_all(urls: list[str]) -> dict[str, tuple[str, int | None, str]]:
-    sem = asyncio.Semaphore(CONCURRENCY)
+async def _probe_all(
+    urls: list[str],
+    time_budget: float | None = None,
+    concurrency: int | None = None,
+) -> dict[str, tuple[str, int | None, str]]:
+    sem = asyncio.Semaphore(concurrency or CONCURRENCY)
     headers = {
         "User-Agent": ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                        "AppleWebKit/537.36 (KHTML, like Gecko) "
                        "Chrome/124.0 Safari/537.36 Pitstop/0.1"),
     }
-    async with httpx.AsyncClient(headers=headers, http2=False) as client:
-        results = await asyncio.gather(
-            *(_probe(client, u, sem) for u in urls), return_exceptions=True)
     out: dict[str, tuple[str, int | None, str]] = {}
-    for url, res in zip(urls, results):
-        if isinstance(res, BaseException):
-            out[url] = (LinkStatus.UNVERIFIED, None, url)
-        else:
-            out[url] = res
+
+    async with httpx.AsyncClient(headers=headers, http2=False) as client:
+        tasks = {asyncio.ensure_future(_probe(client, u, sem)): u for u in urls}
+        # timeout=None waits for everything, which is exactly what the old
+        # asyncio.gather did — the CLI path is unchanged.
+        done, pending = await asyncio.wait(tasks, timeout=time_budget)
+
+        for task in pending:
+            task.cancel()
+        if pending:
+            await asyncio.gather(*pending, return_exceptions=True)
+
+        for task in done:
+            url = tasks[task]
+            try:
+                out[url] = task.result()
+            except BaseException:  # noqa: BLE001 — one bad URL is not fatal
+                out[url] = (LinkStatus.UNVERIFIED, None, url)
+
+        # Ran out of time. The check stays silent about these, so a tight
+        # budget can only ever cost us findings — never invent one.
+        for task in pending:
+            out[tasks[task]] = (LinkStatus.UNREACHED, None, tasks[task])
+
     return out
 
 
-def probe_urls(urls: list[str]) -> dict[str, tuple[str, int | None, str]]:
+def probe_urls(
+    urls: list[str],
+    time_budget: float | None = None,
+    concurrency: int | None = None,
+) -> dict[str, tuple[str, int | None, str]]:
     """Sync entry point. Safe to call from inside an existing loop via a thread."""
     if not urls:
         return {}
+    coro = lambda: _probe_all(urls, time_budget, concurrency)  # noqa: E731
     try:
         asyncio.get_running_loop()
     except RuntimeError:
-        return asyncio.run(_probe_all(urls))
+        return asyncio.run(coro())
     # Already inside a loop (FastAPI). Run in a private one on a worker thread.
     import concurrent.futures
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
-        return pool.submit(asyncio.run, _probe_all(urls)).result()
+        return pool.submit(asyncio.run, coro()).result()
 
 
 @register
@@ -172,8 +201,40 @@ class DeadLinkCheck(BaseCheck):
 
         cache = ctx.cache.setdefault("link_status", {})
         todo = [u for u in unique if u not in cache]
+
+        # Highest-traffic video first. Without a budget this changes nothing —
+        # every URL gets resolved either way. With one, it means the links we
+        # do reach are the ones costing the most money.
+        todo.sort(key=lambda u: -max(v.views_per_day for v in unique[u]))
+
+        unreached: list[str] = []
+        if ctx.link_max_urls is not None and len(todo) > ctx.link_max_urls:
+            unreached = todo[ctx.link_max_urls:]
+            todo = todo[:ctx.link_max_urls]
+
         if todo:
-            cache.update(probe_urls(todo))
+            cache.update(probe_urls(todo, ctx.link_time_budget,
+                                    ctx.link_concurrency))
+        for url in unreached:
+            cache[url] = (LinkStatus.UNREACHED, None, url)
+
+        # Leave a receipt so the caller can disclose what was not reached
+        # rather than implying the whole catalog was resolved. The two ceilings
+        # are counted separately because they mean different things to a
+        # reader: "we stopped at N links" is a policy, "N links timed out" is a
+        # network condition.
+        timed_out = sum(
+            1 for u in todo
+            if cache.get(u, ("", None, ""))[0] == LinkStatus.UNREACHED)
+        ctx.cache["link_budget"] = {
+            "unique_urls": len(unique),
+            "resolved": len(unique) - len(unreached) - timed_out,
+            "unreached": len(unreached) + timed_out,
+            "over_cap": len(unreached),
+            "timed_out": timed_out,
+            "capped_at": ctx.link_max_urls,
+            "time_budget": ctx.link_time_budget,
+        }
 
         for url, videos in unique.items():
             status, code, final = cache.get(url, (LinkStatus.UNVERIFIED, None, url))

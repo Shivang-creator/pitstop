@@ -27,6 +27,7 @@ def fetch_catalog(
     channel_ref: str,
     *,
     limit: int | None = None,
+    playlist_limit: int | None = None,
     with_captions: bool = False,
     with_analytics: bool = False,
     progress=None,
@@ -35,6 +36,12 @@ def fetch_catalog(
 
     `progress` is an optional callable(stage: str, done: int, total: int|None)
     so the CLI and the web UI can both render live progress off the same fetch.
+
+    `limit` and `playlist_limit` both default to None — the CLI fetches whole
+    channels. The public web scan sets them because it runs inside one HTTP
+    request. Whether either bit is recorded on the returned Catalog, so the
+    caller can disclose it rather than quietly reporting a partial scan as a
+    complete one.
     """
 
     def tick(stage: str, done: int = 0, total: int | None = None) -> None:
@@ -55,7 +62,9 @@ def fetch_catalog(
              len(video_ids))
 
     tick("Fetching playlists")
-    playlists = client.list_playlists(channel.id)
+    playlists = client.list_playlists(
+        channel.id, limit=playlist_limit,
+        progress=lambda done, total: tick("Fetching playlists", done, total))
 
     catalog = Catalog(
         channel=channel,
@@ -63,6 +72,9 @@ def fetch_catalog(
         playlists=playlists,
         is_owner=client.is_owner or client.mode == "FIXTURE",
         fetched_at=datetime.now(timezone.utc),
+        videos_truncated=bool(limit) and len(video_ids) >= limit
+        and bool(channel.video_count) and channel.video_count > len(video_ids),
+        playlists_truncated=client.playlists_truncated,
     )
 
     # Caption availability is already on every video for free —

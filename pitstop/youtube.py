@@ -94,6 +94,8 @@ class YouTubeClient:
         self.is_owner = owner
         self._data = None
         self._analytics = None
+        # Set by list_playlists when a caller-supplied cap stopped the walk.
+        self.playlists_truncated = False
 
         if fixture:
             self.mode = "FIXTURE"
@@ -352,7 +354,22 @@ class YouTubeClient:
             raise
         return [self._parse_video(v) for v in resp.get("items", [])]
 
-    def list_playlists(self, channel_id: str) -> list[Playlist]:
+    def list_playlists(self, channel_id: str, limit: int | None = None,
+                       progress=None) -> list[Playlist]:
+        """Every playlist, with its membership.
+
+        `limit` caps how many playlists get expanded. Each one costs a separate
+        paged playlistItems.list walk, so an unbounded fetch is the one part of
+        a scan whose wall-clock time a caller cannot predict from video count.
+        Only the public web scan sets it; the CLI fetches everything.
+
+        A truncated list is dangerous rather than merely incomplete — a video
+        that lives only in an unfetched playlist looks orphaned. The caller is
+        responsible for disabling the playlist checks when this bites; see
+        `catalog.fetch_catalog`, which records the truncation on the Catalog.
+        """
+        self.playlists_truncated = False
+
         if self.mode == "FIXTURE":
             self._charge("playlists.list")
             out = []
@@ -363,7 +380,14 @@ class YouTubeClient:
                     item_video_ids=list(raw.get("item_video_ids", [])),
                     broken_video_ids=list(raw.get("broken_video_ids", [])),
                 ))
+            if limit and len(out) > limit:
+                self.playlists_truncated = True
+                return out[:limit]
             return out
+
+        # Read one past the cap so "we stopped early" is a fact rather than an
+        # inference from a round number.
+        hard_stop = limit + 1 if limit else None
 
         playlists: list[Playlist] = []
         for raw in self._paged("playlists", "playlists.list",
@@ -371,8 +395,20 @@ class YouTubeClient:
                                channelId=channel_id, maxResults=50):
             playlists.append(Playlist(id=raw["id"],
                                       title=raw["snippet"]["title"]))
+            if hard_stop and len(playlists) >= hard_stop:
+                break
 
-        for pl in playlists:
+        if limit and len(playlists) > limit:
+            self.playlists_truncated = True
+            playlists = playlists[:limit]
+
+        # Each playlist is a separate paged walk, so this loop — not the video
+        # fetch — is the slowest part of scanning a channel with a large
+        # playlist shelf. Report per-playlist so a caller can show movement
+        # instead of one frozen line for thirty seconds.
+        for done, pl in enumerate(playlists):
+            if progress:
+                progress(done, len(playlists))
             for item in self._paged("playlistItems", "playlistItems.list",
                                     part="contentDetails,status",
                                     playlistId=pl.id, maxResults=50):

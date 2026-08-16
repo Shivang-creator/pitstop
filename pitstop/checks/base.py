@@ -51,6 +51,23 @@ class CheckContext:
     # link checker resolves each unique URL once for the whole catalog).
     cache: dict = None  # type: ignore[assignment]
 
+    # --- optional budget for network-bound checks ---------------------------
+    # Both default to None, meaning "no ceiling" — that is what the CLI uses,
+    # and it is the behaviour every existing test asserts against.
+    #
+    # The public web scan sets them, because a shared HTTP request cannot spend
+    # unbounded time resolving a 900-link catalog. When either bites, the check
+    # records what it could not reach in `cache["link_budget"]` so the caller
+    # can say so out loud. Unreached links are reported as UNVERIFIED, never as
+    # dead — a budget must cost us findings, never invent them.
+    link_max_urls: int | None = None
+    link_time_budget: float | None = None
+    # How many link probes run at once. None keeps links.CONCURRENCY, which is
+    # tuned to be a polite neighbour from one creator's laptop. A single
+    # serverless scan is a different situation — it is one request, once, and
+    # the visitor is watching — so the public scanner raises it.
+    link_concurrency: int | None = None
+
     def __post_init__(self) -> None:
         if self.rules is None:
             self.rules = {}
