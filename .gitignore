@@ -18,3 +18,6 @@ web/tsconfig.tsbuildinfo
 .env*
 # …but the template carries no secrets and is the setup instructions.
 !.env.example
+
+# submission copy lives in the brainstorming folder, not the code repo
+DEVPOST.md
