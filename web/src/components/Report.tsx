@@ -316,6 +316,43 @@ export function Report({
         </section>
       )}
 
+      {/* ── founding access ────────────────────────────────────────── */}
+      <div className="rise mt-10 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="max-w-xl">
+            <h2 className="text-[15px] font-semibold text-white">
+              {score.auto_fixable > 0
+                ? `${fmt.int(score.auto_fixable)} of these can be repaired automatically.`
+                : "Keep this catalog from rotting again."}
+            </h2>
+            <p className="mt-1.5 text-[12.5px] leading-relaxed text-[color:var(--color-ink-400)]">
+              The scan is free and always will be. Pitstop Pro applies the
+              repairs through your own YouTube account and re-checks the
+              catalog monthly, so a dead link never leaks for two years again.
+              It isn't on sale yet — founding creators get it first, and set
+              the price with us.
+            </p>
+          </div>
+          <Button
+            onClick={() => {
+              const subject = encodeURIComponent(
+                `Pitstop Pro founding access — ${scan.channel.title}`,
+              );
+              const body = encodeURIComponent(
+                `Channel: ${channelUrl}\nVideos: ${scan.video_count}\n\nWhat would make this worth paying for, for you?\n`,
+              );
+              window.location.href = `mailto:zingua816@gmail.com?subject=${subject}&body=${body}`;
+            }}
+          >
+            Ask for founding access
+          </Button>
+        </div>
+        <p className="mt-3 font-mono text-[10.5px] text-[color:var(--color-ink-600)]">
+          One email, no list, no spam. You're telling us this is worth building
+          — that's all it does.
+        </p>
+      </div>
+
       <footer className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.05] pt-5 font-mono text-[11px] text-[color:var(--color-ink-600)]">
         <span>
           quota {fmt.int(scan.quota.spent)}/{fmt.int(scan.quota.budget)} units ·{" "}
