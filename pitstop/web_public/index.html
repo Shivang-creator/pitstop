@@ -81,12 +81,13 @@ input{
 }
 input::placeholder{color:var(--ink-600)}
 input:focus{outline:none; border-color:var(--notice); box-shadow:0 0 0 3px rgba(88,184,255,.16)}
-button{
+button,a.btn{
   padding:.95rem 1.6rem; border-radius:.7rem; border:1px solid transparent;
   background:var(--ink-200); color:var(--ink-950); font-family:var(--sans);
   font-weight:600; font-size:.98rem; cursor:pointer; transition:transform .12s, opacity .16s;
 }
 button:hover:not(:disabled){transform:translateY(-1px)}
+a.btn{display:inline-block; text-decoration:none}
 button:disabled{opacity:.5; cursor:progress}
 :focus-visible{outline:2px solid var(--notice); outline-offset:2px}
 
@@ -461,6 +462,19 @@ paste a handle → score + priced findings</pre>
 <b>pitstop plan</b> ${esc(c.handle ? "@" + c.handle : c.id)}   <i># the diff. changes nothing</i>
 <b>pitstop apply</b> ${esc(c.handle ? "@" + c.handle : c.id)}  <i># ${num(s.auto_fixable)} fixes, for real</i></pre>
         </div>
+      </div>
+    </section>
+
+    <section>
+      <p class="eyebrow">Founding access</p>
+      <div class="card" style="padding:1.4rem 1.5rem">
+        <h3 style="margin:0 0 .4rem">${s.auto_fixable > 0 ? `${num(s.auto_fixable)} of these could be repaired automatically, every month.` : `Keep this catalog from rotting again.`}</h3>
+        <p class="fdesc" style="margin:0 0 .9rem">The scan stays free. Pitstop Pro applies the repairs
+           through your own account and re-checks the catalog monthly, so a dead
+           link never leaks for two years again. It isn't on sale yet — founding
+           creators get it first and set the price with us. One email, no list:
+           you're telling us this is worth building, that's all it does.</p>
+        <a class="btn" href="mailto:zingua816@gmail.com?subject=${encodeURIComponent("Pitstop Pro founding access — " + c.title)}&body=${encodeURIComponent("Channel: " + (c.handle ? "https://www.youtube.com/@" + c.handle : "https://www.youtube.com/channel/" + c.id) + "\n\nWhat would make this worth paying for, for you?\n")}">Ask for founding access</a>
       </div>
     </section>`;
 
