@@ -27,6 +27,8 @@ descriptions because their own network hiccuped would be worse than useless.
 from __future__ import annotations
 
 import asyncio
+import ipaddress
+import socket
 from typing import Iterable
 
 import httpx
@@ -82,9 +84,86 @@ def _classify(code: int) -> str:
     return LinkStatus.ALIVE
 
 
+class RefusedTarget(Exception):
+    """The URL points somewhere a link checker has no business going."""
+
+
+def _is_public_address(raw: str) -> bool:
+    try:
+        addr = ipaddress.ip_address(raw.split("%", 1)[0])
+    except ValueError:
+        return False
+    mapped = getattr(addr, "ipv4_mapped", None)
+    if mapped is not None:
+        addr = mapped
+    return addr.is_global
+
+
+async def _refuse_internal(request: httpx.Request) -> None:
+    """Refuse loopback, private, link-local and metadata addresses.
+
+    The URLs come out of video descriptions, which means out of the hands of
+    whoever owns the channel being scanned. Without this, a description
+    containing `http://127.0.0.1:9001/…` or `http://169.254.169.254/…` makes
+    the scanner — the public deployment, or a creator's laptop inside their
+    home network — issue that request, and the dead/alive verdict tells the
+    author what answered.
+
+    Registered as an httpx request hook, so it runs for every hop of a redirect
+    chain and not only for the URL as written. A name that does not resolve at
+    all is let through: the probe then fails exactly as it did before.
+
+    Not covered: a hostile DNS server that answers with a public address here
+    and a private one a moment later for the connection itself.
+    """
+    host = (request.url.host or "").strip("[]")
+    if not host:
+        raise RefusedTarget(str(request.url))
+    try:
+        ipaddress.ip_address(host.split("%", 1)[0])
+        addresses = [host]
+    except ValueError:
+        try:
+            infos = await asyncio.get_running_loop().getaddrinfo(
+                host, None, type=socket.SOCK_STREAM)
+        except OSError:
+            return
+        addresses = [info[4][0] for info in infos]
+    if not all(_is_public_address(a) for a in addresses):
+        raise RefusedTarget(str(request.url))
+
+
+def _is_tls_failure(exc: BaseException) -> bool:
+    """A certificate or handshake problem, as opposed to nobody being home.
+
+    httpx reports both as ConnectError. They are not the same finding: Python
+    rejects an incomplete certificate chain that every browser quietly repairs,
+    so the page is up for viewers and only looks down to us.
+    """
+    seen = 0
+    cause: BaseException | None = exc
+    while cause is not None and seen < 6:
+        text = f"{type(cause).__name__} {cause}"
+        if "SSL" in text or "CERTIFICATE" in text or "certificate" in text:
+            return True
+        cause = cause.__cause__ or cause.__context__
+        seen += 1
+    return False
+
+
 async def _probe(client: httpx.AsyncClient, url: str,
                  sem: asyncio.Semaphore) -> tuple[str, int | None, str]:
     """Return (status, http_code, final_url)."""
+    try:
+        return await _probe_unguarded(client, url, sem)
+    except RefusedTarget:
+        # Never fetched, so nothing is known about it — and nothing is said.
+        return LinkStatus.UNVERIFIED, None, url
+
+
+async def _probe_unguarded(
+        client: httpx.AsyncClient, url: str,
+        sem: asyncio.Semaphore) -> tuple[str, int | None, str]:
     async with sem:
         host = httpx.URL(url).host or ""
         methods = ["GET"] if any(h in host for h in GET_ONLY_HOSTS) else ["HEAD", "GET"]
@@ -114,7 +193,9 @@ async def _probe(client: httpx.AsyncClient, url: str,
         try:
             resp = await client.get(url, follow_redirects=True, timeout=TIMEOUT)
             return _classify(resp.status_code), resp.status_code, str(resp.url)
-        except httpx.ConnectError:
+        except httpx.ConnectError as exc:
+            if _is_tls_failure(exc):
+                return LinkStatus.UNVERIFIED, None, url
             # DNS failure or refused connection, twice. The domain is gone.
             return LinkStatus.DEAD, None, url
         except httpx.HTTPError:
@@ -135,7 +216,9 @@ async def _probe_all(
     }
     out: dict[str, tuple[str, int | None, str]] = {}
 
-    async with httpx.AsyncClient(headers=headers, http2=False) as client:
+    async with httpx.AsyncClient(
+            headers=headers, http2=False,
+            event_hooks={"request": [_refuse_internal]}) as client:
         tasks = {asyncio.ensure_future(_probe(client, u, sem)): u for u in urls}
         # timeout=None waits for everything, which is exactly what the old
         # asyncio.gather did — the CLI path is unchanged.
@@ -193,8 +276,10 @@ class DeadLinkCheck(BaseCheck):
     def run(self, catalog: Catalog, ctx: CheckContext) -> Iterable[Finding]:
         unique: dict[str, list] = {}
         for video in catalog.videos:
-            for url in video.urls:
-                unique.setdefault(url.rstrip(".,);"), []).append(video)
+            # A description that repeats a link (top line and footer is the
+            # usual shape) is one broken link on that video, not two.
+            for url in dict.fromkeys(u.rstrip(".,);") for u in video.urls):
+                unique.setdefault(url, []).append(video)
 
         if not unique:
             return
