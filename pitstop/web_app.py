@@ -34,7 +34,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
@@ -50,6 +50,7 @@ from .public_scan import (
     redact,
     result_json,
 )
+from .youtube import parse_channel_ref
 
 app = FastAPI(title="Pitstop — public channel audit", version="0.1.0",
               docs_url=None, redoc_url=None)
@@ -103,6 +104,121 @@ def _cache_put(key: str, payload: dict[str, Any]) -> None:
     _CACHE[key] = (time.time(), payload)
 
 
+def _cache_key(channel: str) -> str:
+    """One key per channel, however it was typed.
+
+    `@MKBHD`, `mkbhd` and `https://youtube.com/@mkbhd/videos` are the same
+    scan. Keyed on the raw string they were three, each paying full quota.
+    Channel ids are case-sensitive and keep their case; handles are not.
+    """
+    kind, value = parse_channel_ref(channel)
+    return f"{kind}:{value if kind == 'id' else value.lower()}"
+
+
+# --- abuse ceilings ---------------------------------------------------------
+# One API key with 10,000 units a day sits behind an endpoint anyone can POST
+# to. A scan costs 30-120 units and a lookup of a name that does not exist
+# costs 2, so without a ceiling a loop of a few hundred requests ends the day
+# for every other visitor.
+#
+# These counters live in this process. On a serverless platform that makes them
+# a floor, not a guarantee: a second warm instance has its own. They stop the
+# casual loop and the runaway script; a platform-level rate limit on
+# /api/scan* is still the real control.
+RATE_WINDOW_SECONDS = 10 * 60
+RATE_PER_WINDOW = _int_env("PITSTOP_PUBLIC_SCANS_PER_10MIN", 12)
+RATE_PER_DAY = _int_env("PITSTOP_PUBLIC_SCANS_PER_DAY", 60)
+# Below the real 10,000 so the operator's own CLI use keeps some headroom.
+DAILY_UNIT_CEILING = _int_env("PITSTOP_PUBLIC_DAILY_UNITS", 8000)
+# What a scan that failed is assumed to have cost: the two channels.list
+# lookups a name that does not resolve goes through.
+FAILED_SCAN_UNITS = 2
+
+_HITS: dict[str, list[float]] = {}
+_SPENT: dict[str, Any] = {"day": "", "units": 0}
+
+
+def _quota_day(now: float) -> str:
+    # The Data API's day rolls over at midnight Pacific. Fixed UTC-8 rather
+    # than a tz database lookup: an hour's error in summer is harmless here
+    # and a missing tzdata on the platform would not be.
+    return time.strftime("%Y-%m-%d", time.gmtime(now - 8 * 3600))
+
+
+def _client_ip(request: Request) -> str:
+    # The platform overwrites both headers with the address it saw, so a
+    # caller cannot choose their own bucket by sending one.
+    forwarded = (request.headers.get("x-real-ip")
+                 or request.headers.get("x-forwarded-for") or "")
+    ip = forwarded.split(",")[0].strip()
+    return ip or (request.client.host if request.client else "unknown")
+
+
+def _record_spend(units: int) -> None:
+    day = _quota_day(time.time())
+    if _SPENT["day"] != day:
+        _SPENT.update(day=day, units=0)
+    _SPENT["units"] += max(0, int(units))
+
+
+def _admit(ip: str) -> PublicScanError | None:
+    """Decide whether a scan that will spend quota may start."""
+    now = time.time()
+    _record_spend(0)   # rolls the day over
+    if _SPENT["units"] >= DAILY_UNIT_CEILING:
+        return PublicScanError(
+            "quota",
+            "This deployment has used its YouTube API allowance for today.",
+            hint="It resets at midnight Pacific time. The CLI uses your own "
+                 "API key and your own quota.")
+
+    recent = [t for t in _HITS.get(ip, ()) if now - t < 24 * 3600]
+    in_window = sum(1 for t in recent if now - t < RATE_WINDOW_SECONDS)
+    if in_window >= RATE_PER_WINDOW or len(recent) >= RATE_PER_DAY:
+        _HITS[ip] = recent
+        return PublicScanError(
+            "rate",
+            "Too many scans from this network — give it a few minutes.",
+            hint="Channels already scanned are cached and still open "
+                 "instantly.")
+
+    recent.append(now)
+    _HITS[ip] = recent
+    if len(_HITS) > 5000:
+        for stale in [k for k, v in _HITS.items()
+                      if not v or now - v[-1] > 24 * 3600]:
+            _HITS.pop(stale, None)
+    return None
+
+
+def _scan_and_cache(channel: str, key: str, progress=None) -> dict[str, Any]:
+    """Run one scan and account for it. Blocking — call on a worker thread.
+
+    The spend is recorded here rather than by the caller because the caller
+    may be gone: a client that opens the stream and hangs up has still cost
+    the units.
+    """
+    try:
+        result = public_scan(
+            channel,
+            video_cap=VIDEO_CAP, playlist_cap=PLAYLIST_CAP,
+            link_cap=LINK_CAP, link_time_budget=LINK_TIME_BUDGET,
+            link_concurrency=LINK_CONCURRENCY, progress=progress)
+    except Exception:
+        _record_spend(FAILED_SCAN_UNITS)
+        raise
+    _record_spend(result.quota_spent)
+    payload = result_json(result)
+    _cache_put(key, payload)
+    return payload
+
+
+def _refusal(exc: PublicScanError) -> JSONResponse:
+    return JSONResponse(
+        status_code=_STATUS.get(exc.kind, 400),
+        content={"error": exc.kind, "message": exc.message, "hint": exc.hint})
+
+
 class ScanRequest(BaseModel):
     channel: str = Field(..., max_length=300,
                          description="Channel URL, @handle or UC… id")
@@ -111,7 +227,8 @@ class ScanRequest(BaseModel):
 # HTTP status per failure kind. 404 for a channel that isn't there, 429 for a
 # spent quota (it is a rate limit and it will recover), 503 for a deployment
 # that was never configured.
-_STATUS = {"not_found": 404, "quota": 429, "config": 503, "upstream": 502}
+_STATUS = {"not_found": 404, "quota": 429, "rate": 429, "config": 503,
+           "upstream": 502}
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -138,15 +255,25 @@ async def healthz() -> dict:
 
 
 @app.post("/api/scan")
-async def scan(req: ScanRequest):
+async def scan(req: ScanRequest, request: Request):
     """Audit a public channel, streaming progress as SSE.
 
     Always 200 at the transport level once the stream opens — failures arrive
     as an `error` event, because an SSE body cannot change its status code
     after the first byte. `/api/scan.json` is the non-streaming twin and does
     use real status codes.
+
+    The one exception is a refusal before the scan starts (rate limit, spent
+    allowance): nothing has been streamed yet, so that is a plain 429 and the
+    page falls back to the JSON twin, which says the same thing.
     """
     channel = req.channel.strip()
+    key = _cache_key(channel)
+    if channel and _cache_get(key) is None:
+        refused = _admit(_client_ip(request))
+        if refused:
+            return _refusal(refused)
+
     queue: asyncio.Queue = asyncio.Queue()
     loop = asyncio.get_running_loop()
 
@@ -154,21 +281,14 @@ async def scan(req: ScanRequest):
         loop.call_soon_threadsafe(queue.put_nowait, (event, data))
 
     def work() -> dict[str, Any]:
-        cached = _cache_get(channel.lower())
+        cached = _cache_get(key)
         if cached:
             return cached
-        result = public_scan(
-            channel,
-            video_cap=VIDEO_CAP, playlist_cap=PLAYLIST_CAP,
-            link_cap=LINK_CAP, link_time_budget=LINK_TIME_BUDGET,
-            link_concurrency=LINK_CONCURRENCY,
+        return _scan_and_cache(
+            channel, key,
             progress=lambda phase, stage, done, total: emit(
                 "progress", {"phase": phase, "stage": stage,
-                             "done": done, "total": total}),
-        )
-        payload = result_json(result)
-        _cache_put(channel.lower(), payload)
-        return payload
+                             "done": done, "total": total}))
 
     async def worker() -> None:
         try:
@@ -209,27 +329,22 @@ async def scan(req: ScanRequest):
 
 
 @app.post("/api/scan.json")
-async def scan_json(req: ScanRequest):
+async def scan_json(req: ScanRequest, request: Request):
     """The same scan, one JSON response, real status codes.
 
     Exists so the deployed audit is scriptable — `curl -d '{"channel":"@x"}'`
     — and so the failure paths can be tested without an SSE parser.
     """
     channel = req.channel.strip()
+    key = _cache_key(channel)
     try:
-        cached = _cache_get(channel.lower())
+        cached = _cache_get(key)
         if cached:
             return cached
-        payload = await asyncio.to_thread(
-            lambda: result_json(public_scan(
-                channel,
-                video_cap=VIDEO_CAP, playlist_cap=PLAYLIST_CAP,
-                link_cap=LINK_CAP, link_time_budget=LINK_TIME_BUDGET,
-                link_concurrency=LINK_CONCURRENCY)))
-        _cache_put(channel.lower(), payload)
-        return payload
+        if channel:
+            refused = _admit(_client_ip(request))
+            if refused:
+                return _refusal(refused)
+        return await asyncio.to_thread(_scan_and_cache, channel, key)
     except PublicScanError as exc:
-        return JSONResponse(
-            status_code=_STATUS.get(exc.kind, 400),
-            content={"error": exc.kind, "message": exc.message,
-                     "hint": exc.hint})
+        return _refusal(exc)
