@@ -423,3 +423,46 @@ def test_a_public_client_refuses_every_write():
         except AuthRequired:
             continue
         raise AssertionError("a public client performed a privileged call")
+
+
+# --- a channel with nothing uploaded is not an outage ------------------------
+
+
+def _client_whose_uploads_playlist_raises(exc: Exception):
+    from pitstop.youtube import YouTubeClient
+
+    client = object.__new__(YouTubeClient)
+    client.mode = "PUBLIC"
+    client.is_owner = False
+
+    def paged(*args, **kwargs):
+        raise exc
+        yield  # pragma: no cover — makes this a generator, like the real one
+
+    client._paged = paged
+    return client
+
+
+def test_a_channel_with_no_uploads_is_an_empty_list_not_a_crash():
+    """YouTube answers the uploads playlist of a channel that has never
+    published with 404 playlistNotFound. That used to surface to the visitor
+    as "YouTube's API did not answer that request"."""
+    class Resp:
+        status = 404
+
+    class NotFound(Exception):
+        resp = Resp()
+
+    client = _client_whose_uploads_playlist_raises(
+        NotFound('<HttpError 404 ... "reason": "playlistNotFound">'))
+    assert client.list_uploads("UUxxxxxxxxxxxxxxxxxxxxxx", limit=150) == []
+
+
+def test_other_upload_failures_still_propagate():
+    client = _client_whose_uploads_playlist_raises(
+        RuntimeError('<HttpError 403 ... "reason": "quotaExceeded">'))
+    try:
+        client.list_uploads("UUxxxxxxxxxxxxxxxxxxxxxx")
+    except RuntimeError:
+        return
+    raise AssertionError("a quota error was swallowed as an empty channel")

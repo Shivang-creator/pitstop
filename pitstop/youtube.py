@@ -17,6 +17,7 @@ a single real unit.
 from __future__ import annotations
 
 import json
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -183,6 +184,12 @@ class YouTubeClient:
                     "to the terminal."),
             )
         CONFIG.token_file.write_text(creds.to_json(), encoding="utf-8")
+        # A refresh token with write access to the channel. Not for every
+        # other account on the machine to read.
+        try:
+            os.chmod(CONFIG.token_file, 0o600)
+        except OSError:
+            pass
         return creds
 
     # -- request plumbing ----------------------------------------------------
@@ -288,13 +295,22 @@ class YouTubeClient:
             return ids[:limit] if limit else ids
 
         ids: list[str] = []
-        for item in self._paged("playlistItems", "playlistItems.list",
-                                part="contentDetails",
-                                playlistId=uploads_playlist_id,
-                                maxResults=50):
-            ids.append(item["contentDetails"]["videoId"])
-            if limit and len(ids) >= limit:
-                break
+        try:
+            for item in self._paged("playlistItems", "playlistItems.list",
+                                    part="contentDetails",
+                                    playlistId=uploads_playlist_id,
+                                    maxResults=50):
+                ids.append(item["contentDetails"]["videoId"])
+                if limit and len(ids) >= limit:
+                    break
+        except Exception as exc:
+            # A channel that has never published anything still reports an
+            # uploads playlist id, and asking for its items is a 404
+            # playlistNotFound rather than an empty page. That is "no videos",
+            # not an outage.
+            if not ids and _is_missing_playlist(exc):
+                return []
+            raise
         return ids
 
     def hydrate_videos(self, video_ids: list[str]) -> list[Video]:
@@ -567,6 +583,11 @@ class YouTubeClient:
             caption_available=(cd.get("caption") == "true"
                                if "caption" in cd else None),
         )
+
+
+def _is_missing_playlist(exc: BaseException) -> bool:
+    status = getattr(getattr(exc, "resp", None), "status", None)
+    return str(status) == "404" or "playlistNotFound" in str(exc)
 
 
 def _parse_dt(value: str | None) -> datetime:
