@@ -502,6 +502,14 @@ class YouTubeClient:
             raise YouTubeError(f"Video {video_id} not found or not yours.")
 
         snippet = items[0]["snippet"]
+        # Nothing upstream checks that the scanned channel is the signed-in
+        # one: `apply @someone-else` with a valid token would spend 50 units
+        # per video on updates YouTube is bound to refuse. Stop at the read.
+        mine = self._own_channel_id()
+        if snippet.get("channelId") and snippet["channelId"] != mine:
+            raise YouTubeError(
+                f"Video {video_id} belongs to another channel; the signed-in "
+                f"account can only edit its own videos.")
         snippet.update(snippet_updates)
         body: dict[str, Any] = {"id": video_id, "snippet": snippet}
         parts = ["snippet"]
@@ -513,6 +521,13 @@ class YouTubeClient:
 
         self._charge("videos.update")
         self.data.videos().update(part=",".join(parts), body=body).execute()
+
+    def _own_channel_id(self) -> str:
+        cached = getattr(self, "_mine_id", None)
+        if cached is None:
+            channel, _ = self.resolve_channel(self.MINE)
+            cached = self._mine_id = channel.id
+        return cached
 
     def add_to_playlist(self, playlist_id: str, video_id: str) -> None:
         if self.mode == "FIXTURE":

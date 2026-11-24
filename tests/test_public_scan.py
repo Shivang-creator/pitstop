@@ -466,3 +466,41 @@ def test_other_upload_failures_still_propagate():
     except RuntimeError:
         return
     raise AssertionError("a quota error was swallowed as an empty channel")
+
+
+def test_an_owner_client_will_not_update_another_channels_video():
+    """`apply` against a channel the token does not own must stop at the
+    1-unit read, not spend 50 units on an update YouTube will refuse."""
+    from pitstop.quota import QuotaLedger
+    from pitstop.youtube import YouTubeClient, YouTubeError
+
+    class _Exec:
+        def __init__(self, payload): self.payload = payload
+        def execute(self): return self.payload
+
+    class _Videos:
+        updates = 0
+        def list(self, **_): return _Exec({"items": [{
+            "snippet": {"channelId": "UC_other", "title": "t"},
+            "status": {}}]})
+        def update(self, **_):
+            _Videos.updates += 1
+            return _Exec({})
+
+    class _Data:
+        def videos(self): return _Videos()
+
+    client = object.__new__(YouTubeClient)
+    client.mode = "OWNER"
+    client.is_owner = True
+    client.ledger = QuotaLedger(budget=10_000)
+    client._data = _Data()
+    client._mine_id = "UC_mine"
+
+    try:
+        client.update_video("v", {"title": "x"})
+    except YouTubeError:
+        pass
+    else:
+        raise AssertionError("updated a video on someone else's channel")
+    assert _Videos.updates == 0
